@@ -1,0 +1,6 @@
+{
+  "name": "Autonomic I/O",
+  "description": "A beautifully polished, professional, and interactive full-stack landing page for Optiv AI featuring real-time AI generation simulation, live counters, interactive onboarding tabs, and stunning animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
