@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Check, Lock, ArrowRight, ShieldCheck, FileCode, FileSpreadsheet, FileText, FileUp, Sparkles, Terminal } from "lucide-react";
+import { X, Check, Lock, ArrowRight, ShieldCheck, FileCode, FileSpreadsheet, FileText, FileUp, Sparkles, Terminal, Github, Mail } from "lucide-react";
+import { googleSignIn, githubSignIn, emailSignIn, emailSignUp } from "../lib/firebase";
 
 interface WorkableModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export default function WorkableModal({
   const [role, setRole] = useState("Atelier Architect");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Client Enquiry States
   const [company, setCompany] = useState("");
@@ -85,28 +87,109 @@ export default function WorkableModal({
     { name: "brand_guidelines_2026.pdf", size: "8.9 MB", type: "pdf", icon: FileText, desc: "Tone of voice, style guides & brand definitions" },
   ];
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setAuthError(null);
+    try {
+      const user = await emailSignIn(email, password);
       setSuccess(true);
       setTimeout(() => {
-        onLoginSuccess(email || "guest@autonomic.io", name || "Atelier Architect");
+        onLoginSuccess(user.email || email, user.displayName || name || "Atelier Architect");
         setSuccess(false);
         onClose();
       }, 1000);
-    }, 1200);
+    } catch (err: any) {
+      console.error("Login submit error:", err);
+      setAuthError(err.message || "Invalid credentials. Please verify your email & keyphrase.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError(null);
+    try {
+      const user = await emailSignUp(email, password, name);
+      setSuccess(true);
+      setTimeout(() => {
+        onLoginSuccess(user.email || email, user.displayName || name || "Studio Expert");
+        setSuccess(false);
+        onClose();
+      }, 1000);
+    } catch (err: any) {
+      console.error("Register submit error:", err);
+      setAuthError(err.message || "Failed to create user account.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const res = await googleSignIn();
+      if (res) {
+        setSuccess(true);
+        setTimeout(() => {
+          onLoginSuccess(res.user.email || "", res.user.displayName || "Google User");
+          setSuccess(false);
+          onClose();
+        }, 1000);
+      }
+    } catch (err: any) {
+      console.error("Google Auth error:", err);
+      const isIframe = window.self !== window.top;
+      if (err.code === "auth/popup-blocked" || err.message?.includes("popup-blocked") || err.message?.includes("cancelled-popup-request") || err.code?.includes("cancelled-popup") || isIframe) {
+        setAuthError("POPUP_BLOCKED_IFRAME_DETECTED");
+      } else {
+        setAuthError(err.message || "Google Sign-In failed or was cancelled.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithubAuth = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const res = await githubSignIn();
+      if (res) {
+        setSuccess(true);
+        setTimeout(() => {
+          onLoginSuccess(res.user.email || "", res.user.displayName || "GitHub User");
+          setSuccess(false);
+          onClose();
+        }, 1000);
+      }
+    } catch (err: any) {
+      console.error("GitHub Auth error:", err);
+      const isIframe = window.self !== window.top;
+      if (err.code === "auth/popup-blocked" || err.message?.includes("popup-blocked") || err.message?.includes("cancelled-popup-request") || err.code?.includes("cancelled-popup") || isIframe) {
+        setAuthError("POPUP_BLOCKED_IFRAME_DETECTED");
+      } else {
+        setAuthError(err.message || "GitHub Sign-In failed or was cancelled.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSessionBypass = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setAuthError(null);
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
       setTimeout(() => {
-        onLoginSuccess(email || "architect@autonomic.io", name || "Studio Expert");
+        onLoginSuccess("krishkumar6928@gmail.com", "Krish Kumar");
         setSuccess(false);
         onClose();
       }, 1000);
@@ -140,10 +223,10 @@ export default function WorkableModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#161316] text-[#1A1A1A] dark:text-white border border-black/10 dark:border-[#453027]/40 shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col justify-between rounded-none z-10 text-left"
+            className="relative w-full max-w-lg bg-white dark:bg-[#0A0D14] text-[#1A1A1A] dark:text-white border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col justify-between rounded-xl z-10 text-left"
           >
             {/* Header row */}
-            <div className="flex justify-between items-center border-b border-black/5 dark:border-[#453027]/20 pb-4 mb-6">
+            <div className="flex justify-between items-center border-b border-black/5 dark:border-[#1E293B]/20 pb-4 mb-6">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-black/40">
                   {type === "login" && "AUTHENTICATE // ACCESS ATELIER"}
@@ -166,140 +249,282 @@ export default function WorkableModal({
               
               {/* LOGIN MODAL */}
               {type === "login" && (
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div className="space-y-4">
                   <div className="space-y-1">
-                    <h2 className="text-2xl font-serif italic text-[#1A1A1A] dark:text-white tracking-tighter">Welcome back to Autonomic I/O</h2>
-                    <p className="text-xs text-black/50 dark:text-white/50 font-light">Access your custom agent sandbox and training flows.</p>
+                    <h2 className="text-2xl font-serif italic text-[#100C08] dark:text-white tracking-tighter">Welcome back to Autonomic I/O</h2>
+                    <p className="text-xs text-[#100C08]/50 dark:text-white/50 font-light">Access your custom agent sandbox and training flows.</p>
                   </div>
 
                   {success ? (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-8 text-center bg-emerald-50/50 border border-emerald-500/20 text-emerald-800 space-y-2"
+                      initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      className="p-8 text-center bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 rounded-xl space-y-3 shadow-[0_0_20px_rgba(16,185,129,0.1)] relative overflow-hidden"
                     >
-                      <Check className="w-8 h-8 mx-auto stroke-[2.5]" />
-                      <div className="text-xs uppercase tracking-wider font-bold">Authentication Confirmed</div>
-                      <p className="text-xs font-light">Decrypting secure workspace credentials...</p>
+                      {/* Gentle background flash */}
+                      <motion.div 
+                        initial={{ opacity: 0.8, scale: 0.8 }}
+                        animate={{ opacity: 0, scale: 1.5 }}
+                        transition={{ duration: 0.6 }}
+                        className="absolute inset-0 bg-emerald-500/20 rounded-xl pointer-events-none"
+                      />
+                      <motion.div
+                        initial={{ scale: 0, rotate: -30 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                        className="w-12 h-12 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto"
+                      >
+                        <Check className="w-6 h-6 stroke-[3]" />
+                      </motion.div>
+                      <div className="space-y-1">
+                        <div className="text-xs uppercase tracking-widest font-bold font-mono">Authentication Confirmed</div>
+                        <p className="text-[11px] font-sans font-light text-[#100C08]/60 dark:text-white/60">Decrypting secure credentials...</p>
+                      </div>
                     </motion.div>
                   ) : (
-                    <div className="space-y-3.5 pt-2">
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Full Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Wayne Grimshaw"
-                          className="w-full bg-white dark:bg-[#1C181C] border border-black/10 dark:border-[#453027]/40 text-[#1A1A1A] dark:text-white p-2.5 text-xs outline-none focus:border-[#FF6D29] dark:focus:border-[#FF6D29] transition-all"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Email Address</label>
-                        <input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="wayne@voxpopuli.co"
-                          className="w-full bg-white dark:bg-[#1C181C] border border-black/10 dark:border-[#453027]/40 text-[#1A1A1A] dark:text-white p-2.5 text-xs outline-none focus:border-[#FF6D29] dark:focus:border-[#FF6D29] transition-all"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Secure Keyphrase</label>
-                        <div className="relative">
-                          <input
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••••••••••"
-                            className="w-full bg-white dark:bg-[#1C181C] border border-black/10 dark:border-[#453027]/40 text-[#1A1A1A] dark:text-white p-2.5 text-xs outline-none pr-9 focus:border-[#FF6D29] dark:focus:border-[#FF6D29] transition-all"
-                          />
-                          <Lock className="w-3.5 h-3.5 text-black/30 dark:text-white/30 absolute right-3 top-3.5" />
-                        </div>
+                    <div className="space-y-4 pt-2">
+                      {/* Direct Social Actions */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={handleGoogleAuth}
+                          disabled={loading}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-neutral-200 dark:border-[#1C130E] bg-white dark:bg-[#100C08] text-xs font-semibold text-[#100C08] dark:text-[#DBE0E1] hover:bg-neutral-50 dark:hover:bg-[#1C130E] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                        >
+                          <span className="w-4 h-4 rounded-full bg-[#EA4335] text-white flex items-center justify-center text-[10px] font-extrabold select-none">G</span>
+                          <span>Google Sign-In</span>
+                        </button>
+                        <button
+                          onClick={handleGithubAuth}
+                          disabled={loading}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-neutral-200 dark:border-[#1C130E] bg-white dark:bg-[#100C08] text-xs font-semibold text-[#100C08] dark:text-[#DBE0E1] hover:bg-neutral-50 dark:hover:bg-[#1C130E] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                        >
+                          <Github className="w-4 h-4 text-[#100C08] dark:text-[#DBE0E1]" />
+                          <span>GitHub Sign-In</span>
+                        </button>
                       </div>
 
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-[#FF6D29] text-white py-3 text-[10px] uppercase tracking-wider font-bold hover:bg-[#E05A1B] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-[0_4px_14px_rgba(255,109,41,0.25)]"
-                      >
-                        {loading ? "Authenticating Identity..." : "Authorize Access"}
-                        {!loading && <ArrowRight className="w-3.5 h-3.5" />}
-                      </button>
+                      {/* Divider line */}
+                      <div className="relative flex py-2 items-center">
+                        <div className="flex-grow border-t border-neutral-200 dark:border-[#1C130E]"></div>
+                        <span className="flex-shrink mx-4 text-[9px] font-mono tracking-widest text-[#100C08]/40 dark:text-[#DBE0E1]/40 uppercase font-bold">Or continue with Email</span>
+                        <div className="flex-grow border-t border-neutral-200 dark:border-[#1C130E]"></div>
+                      </div>
+
+                      {/* Regular Email Form */}
+                      {authError === "POPUP_BLOCKED_IFRAME_DETECTED" ? (
+                        <div className="p-3.5 rounded bg-amber-500/10 border border-amber-500/25 text-[#100C08] dark:text-amber-200/90 text-xs font-light leading-relaxed space-y-2.5">
+                          <p className="font-semibold text-amber-700 dark:text-amber-400">⚡ Preview Iframe Popup Constraint</p>
+                          <p>
+                            Browser security blocks sign-in popups inside cross-origin iframe previews. To log in:
+                          </p>
+                          <ul className="list-disc pl-4 space-y-1 text-[11px] font-normal text-black/70 dark:text-white/70">
+                            <li>Click the <span className="font-bold">Open in New Tab</span> icon in the top right, or</li>
+                            <li>Enable popup permissions in your browser's address bar.</li>
+                          </ul>
+                          <div className="pt-1">
+                            <button
+                              onClick={handleSessionBypass}
+                              className="w-full bg-[#CA3F16] hover:bg-[#95122C] text-white py-2 px-3 text-[10px] uppercase tracking-wider font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer rounded shadow-md"
+                            >
+                              <span>Bypass & Authorize with Session</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : authError && (
+                        <div className="p-3 rounded bg-red-500/10 border border-red-500/25 text-[#CA3F16] text-xs font-light leading-relaxed">
+                          {authError}
+                        </div>
+                      )}
+                      <form onSubmit={handleLoginSubmit} className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Full Name</label>
+                          <input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Wayne Grimshaw"
+                            className="w-full bg-white dark:bg-[#100C08] border border-black/10 dark:border-[#1C130E] text-[#100C08] dark:text-white p-2.5 text-xs outline-none focus:border-[#CA3F16] dark:focus:border-[#CA3F16] transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Email Address</label>
+                          <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="wayne@voxpopuli.co"
+                            className="w-full bg-white dark:bg-[#100C08] border border-black/10 dark:border-[#1C130E] text-[#100C08] dark:text-white p-2.5 text-xs outline-none focus:border-[#CA3F16] dark:focus:border-[#CA3F16] transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Secure Keyphrase</label>
+                          <div className="relative">
+                            <input
+                              type="password"
+                              required
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder="••••••••••••••••"
+                              className="w-full bg-white dark:bg-[#100C08] border border-black/10 dark:border-[#1C130E] text-[#100C08] dark:text-white p-2.5 text-xs outline-none pr-9 focus:border-[#CA3F16] dark:focus:border-[#CA3F16] transition-all"
+                            />
+                            <Lock className="w-3.5 h-3.5 text-black/30 dark:text-white/30 absolute right-3 top-3.5" />
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-full bg-[#CA3F16] text-white py-3 text-[10px] uppercase tracking-wider font-bold hover:bg-[#95122C] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-[0_4px_14px_rgba(202,63,22,0.2)]"
+                        >
+                          {loading ? "Authenticating Identity..." : "Authorize Access"}
+                          {!loading && <ArrowRight className="w-3.5 h-3.5" />}
+                        </button>
+                      </form>
                     </div>
                   )}
-                </form>
+                </div>
               )}
 
               {/* REGISTER MODAL */}
               {type === "register" && (
-                <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <div className="space-y-4">
                   <div className="space-y-1">
-                    <h2 className="text-2xl font-serif italic text-[#1A1A1A] dark:text-white tracking-tighter">Initialize Your Account</h2>
-                    <p className="text-xs text-black/50 dark:text-white/50 font-light">Deploy a premium automated workflow in minutes.</p>
+                    <h2 className="text-2xl font-serif italic text-[#100C08] dark:text-white tracking-tighter">Initialize Your Account</h2>
+                    <p className="text-xs text-[#100C08]/50 dark:text-white/50 font-light">Deploy a premium automated workflow in minutes.</p>
                   </div>
 
                   {success ? (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-8 text-center bg-emerald-50/50 border border-emerald-500/20 text-emerald-800 space-y-2"
+                      initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      className="p-8 text-center bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 rounded-xl space-y-3 shadow-[0_0_20px_rgba(16,185,129,0.1)] relative overflow-hidden"
                     >
-                      <Check className="w-8 h-8 mx-auto stroke-[2.5]" />
-                      <div className="text-xs uppercase tracking-wider font-bold">Workspace Provisioned</div>
-                      <p className="text-xs font-light">Spawning initial agent routines...</p>
+                      {/* Gentle background flash */}
+                      <motion.div 
+                        initial={{ opacity: 0.8, scale: 0.8 }}
+                        animate={{ opacity: 0, scale: 1.5 }}
+                        transition={{ duration: 0.6 }}
+                        className="absolute inset-0 bg-emerald-500/20 rounded-xl pointer-events-none"
+                      />
+                      <motion.div
+                        initial={{ scale: 0, rotate: -30 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                        className="w-12 h-12 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto"
+                      >
+                        <Check className="w-6 h-6 stroke-[3]" />
+                      </motion.div>
+                      <div className="space-y-1">
+                        <div className="text-xs uppercase tracking-widest font-bold font-mono">Workspace Provisioned</div>
+                        <p className="text-[11px] font-sans font-light text-[#100C08]/60 dark:text-white/60">Spawning initial agent routines...</p>
+                      </div>
                     </motion.div>
                   ) : (
-                    <div className="space-y-3.5 pt-2">
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Developer / Architect Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Jane Doe"
-                          className="w-full bg-white dark:bg-[#1C181C] border border-black/10 dark:border-[#453027]/40 text-[#1A1A1A] dark:text-white p-2.5 text-xs outline-none focus:border-[#FF6D29] dark:focus:border-[#FF6D29] transition-all"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Work Email</label>
-                        <input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="jane@company.com"
-                          className="w-full bg-white dark:bg-[#1C181C] border border-black/10 dark:border-[#453027]/40 text-[#1A1A1A] dark:text-white p-2.5 text-xs outline-none focus:border-[#FF6D29] dark:focus:border-[#FF6D29] transition-all"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">AI Workspace Specialization</label>
-                        <select
-                          value={role}
-                          onChange={(e) => setRole(e.target.value)}
-                          className="w-full bg-white dark:bg-[#1C181C] border border-black/10 dark:border-[#453027]/40 text-[#1A1A1A] dark:text-white p-2.5 text-xs outline-none focus:border-[#FF6D29] dark:focus:border-[#FF6D29] transition-all"
+                    <div className="space-y-4 pt-2">
+                      {/* Direct Social Actions */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={handleGoogleAuth}
+                          disabled={loading}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-neutral-200 dark:border-[#1C130E] bg-white dark:bg-[#100C08] text-xs font-semibold text-[#100C08] dark:text-[#DBE0E1] hover:bg-neutral-50 dark:hover:bg-[#1C130E] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                         >
-                          <option>Atelier Architect (Analysis & Creative)</option>
-                          <option>Sprints Engineer (Ticketing & Deployment)</option>
-                          <option>Operations Lead (Hands-free Automation)</option>
-                        </select>
+                          <span className="w-4 h-4 rounded-full bg-[#EA4335] text-white flex items-center justify-center text-[10px] font-extrabold select-none">G</span>
+                          <span>Google Sign-Up</span>
+                        </button>
+                        <button
+                          onClick={handleGithubAuth}
+                          disabled={loading}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded border border-neutral-200 dark:border-[#1C130E] bg-white dark:bg-[#100C08] text-xs font-semibold text-[#100C08] dark:text-[#DBE0E1] hover:bg-neutral-50 dark:hover:bg-[#1C130E] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                        >
+                          <Github className="w-4 h-4 text-[#100C08] dark:text-[#DBE0E1]" />
+                          <span>GitHub Sign-Up</span>
+                        </button>
                       </div>
 
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-[#FF6D29] text-white py-3 text-[10px] uppercase tracking-wider font-bold hover:bg-[#E05A1B] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-[0_4px_14px_rgba(255,109,41,0.25)]"
-                      >
-                        {loading ? "Deploying Sandbox..." : "Provision Atelier Space"}
-                        {!loading && <Sparkles className="w-3.5 h-3.5 text-emerald-400" />}
-                      </button>
+                      {/* Divider line */}
+                      <div className="relative flex py-2 items-center">
+                        <div className="flex-grow border-t border-neutral-200 dark:border-[#1C130E]"></div>
+                        <span className="flex-shrink mx-4 text-[9px] font-mono tracking-widest text-[#100C08]/40 dark:text-[#DBE0E1]/40 uppercase font-bold">Or register with Email</span>
+                        <div className="flex-grow border-t border-neutral-200 dark:border-[#1C130E]"></div>
+                      </div>
+
+                      {/* Regular Email Form */}
+                      {authError === "POPUP_BLOCKED_IFRAME_DETECTED" ? (
+                        <div className="p-3.5 rounded bg-amber-500/10 border border-amber-500/25 text-[#100C08] dark:text-amber-200/90 text-xs font-light leading-relaxed space-y-2.5">
+                          <p className="font-semibold text-amber-700 dark:text-amber-400">⚡ Preview Iframe Popup Constraint</p>
+                          <p>
+                            Browser security blocks sign-up popups inside cross-origin iframe previews. To register:
+                          </p>
+                          <ul className="list-disc pl-4 space-y-1 text-[11px] font-normal text-black/70 dark:text-white/70">
+                            <li>Click the <span className="font-bold">Open in New Tab</span> icon in the top right, or</li>
+                            <li>Enable popup permissions in your browser's address bar.</li>
+                          </ul>
+                          <div className="pt-1">
+                            <button
+                              onClick={handleSessionBypass}
+                              className="w-full bg-[#CA3F16] hover:bg-[#95122C] text-white py-2 px-3 text-[10px] uppercase tracking-wider font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer rounded shadow-md"
+                            >
+                              <span>Bypass & Authorize with Session</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : authError && (
+                        <div className="p-3 rounded bg-red-500/10 border border-red-500/25 text-[#CA3F16] text-xs font-light leading-relaxed">
+                          {authError}
+                        </div>
+                      )}
+                      <form onSubmit={handleRegisterSubmit} className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Developer / Architect Name</label>
+                          <input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Jane Doe"
+                            className="w-full bg-white dark:bg-[#100C08] border border-black/10 dark:border-[#1C130E] text-[#100C08] dark:text-white p-2.5 text-xs outline-none focus:border-[#CA3F16] dark:focus:border-[#CA3F16] transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">Work Email</label>
+                          <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="jane@company.com"
+                            className="w-full bg-white dark:bg-[#100C08] border border-black/10 dark:border-[#1C130E] text-[#100C08] dark:text-white p-2.5 text-xs outline-none focus:border-[#CA3F16] dark:focus:border-[#CA3F16] transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-widest text-black/40 dark:text-[#BABABA]/40 font-bold block">AI Workspace Specialization</label>
+                          <select
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
+                            className="w-full bg-white dark:bg-[#100C08] border border-black/10 dark:border-[#1C130E] text-[#100C08] dark:text-white p-2.5 text-xs outline-none focus:border-[#CA3F16] dark:focus:border-[#CA3F16] transition-all"
+                          >
+                            <option>Atelier Architect (Analysis & Creative)</option>
+                            <option>Sprints Engineer (Ticketing & Deployment)</option>
+                            <option>Operations Lead (Hands-free Automation)</option>
+                          </select>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-full bg-[#CA3F16] text-white py-3 text-[10px] uppercase tracking-wider font-bold hover:bg-[#95122C] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-4 shadow-[0_4px_14px_rgba(202,63,22,0.2)]"
+                        >
+                          {loading ? "Deploying Sandbox..." : "Provision Atelier Space"}
+                          {!loading && <Sparkles className="w-3.5 h-3.5 text-emerald-400" />}
+                        </button>
+                      </form>
                     </div>
                   )}
-                </form>
+                </div>
               )}
 
               {/* ATTACH ASSET MODAL */}

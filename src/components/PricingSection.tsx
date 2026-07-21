@@ -34,7 +34,7 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
       period: "month",
       desc: "Ideal for fast-scaling operations and creators managing multi-channel pipelines.",
       icon: Sparkles,
-      color: "border-[#FF5C43]/20 dark:border-[#FF5C43]/30 bg-white dark:bg-[#1C181C]",
+      color: "border-[#CA3F16]/20 dark:border-[#CA3F16]/30 bg-white dark:bg-[#1C130E]",
       badge: "Most Popular",
       features: [
         "Unlimited workflows & loops",
@@ -54,7 +54,7 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
       period: "annual",
       desc: "For high-volume business clusters requiring strict security, audits, and custom VMs.",
       icon: Shield,
-      color: "border-[#E2E8F0] dark:border-[#222630] bg-white dark:bg-[#181B22]/60",
+      color: "border-[#E2E8F0] dark:border-[#1C130E]/40 bg-white dark:bg-[#1C130E]/60",
       features: [
         "Unlimited connected credentials",
         "Dedicated Postgres pools in your project",
@@ -70,7 +70,7 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
   ];
 
   return (
-    <section id="pricing-section" className="py-24 bg-[#FAFAFC] dark:bg-[#0E1015] px-6 sm:px-10 lg:px-12 border-b border-[#E2E8F0] dark:border-[#222630] transition-colors duration-300 relative">
+    <section id="pricing-section" className="py-24 bg-[#F3F4F5] dark:bg-[#100C08] px-6 sm:px-10 lg:px-12 border-b border-[#E2E8F0] dark:border-[#1C130E] transition-colors duration-300 relative">
       <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto space-y-16 z-10 text-center">
@@ -93,11 +93,11 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
               <div
                 key={idx}
                 className={`relative flex flex-col justify-between p-8 border rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 ${tier.color} ${
-                  tier.primary ? "ring-2 ring-[#FF5C43]/20 scale-102 z-10 md:-translate-y-2" : ""
+                  tier.primary ? "ring-2 ring-[#CA3F16]/20 scale-102 z-10 md:-translate-y-2" : ""
                 }`}
               >
                 {tier.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[8px] uppercase tracking-widest font-extrabold bg-[#FF5C43] text-white rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[8px] uppercase tracking-widest font-extrabold bg-[#CA3F16] text-white rounded-full">
                     {tier.badge}
                   </span>
                 )}
@@ -105,7 +105,7 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
                 <div className="space-y-6">
                   {/* Icon & Title */}
                   <div className="flex items-center justify-between">
-                    <div className={`p-2.5 rounded-lg ${tier.primary ? "bg-[#FF5C43]/10 text-[#FF5C43]" : "bg-neutral-100 dark:bg-white/5 text-[#14161D]/60 dark:text-[#E2E8F0]/60"}`}>
+                    <div className={`p-2.5 rounded-lg ${tier.primary ? "bg-[#CA3F16]/10 text-[#CA3F16]" : "bg-neutral-100 dark:bg-white/5 text-[#14161D]/60 dark:text-[#E2E8F0]/60"}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <span className="text-[9px] font-bold tracking-[0.15em] text-neutral-400 dark:text-neutral-500 uppercase font-mono">
@@ -136,7 +136,7 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
                   <ul className="space-y-3 pt-2 text-xs">
                     {tier.features.map((feature, fIdx) => (
                       <li key={fIdx} className="flex items-start gap-2.5 text-[#14161D]/75 dark:text-[#E2E8F0]/75">
-                        <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${tier.primary ? "text-[#FF5C43]" : "text-emerald-500"}`} />
+                        <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${tier.primary ? "text-[#CA3F16]" : "text-emerald-500"}`} />
                         <span className="font-light">{feature}</span>
                       </li>
                     ))}
@@ -149,7 +149,7 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
                     onClick={tier.onClick}
                     className={`w-full py-3 px-4 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
                       tier.primary
-                        ? "bg-[#FF5C43] hover:bg-[#E04830] text-white shadow-md hover:shadow-lg hover:translate-y-[-1px]"
+                        ? "bg-[#CA3F16] hover:bg-[#95122C] text-white shadow-md hover:shadow-lg hover:translate-y-[-1px]"
                         : "bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 text-[#14161D] dark:text-white border border-transparent dark:border-white/5"
                     }`}
                   >

@@ -2,22 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
-import LogosBar from "./components/LogosBar";
 import OverviewSection from "./components/OverviewSection";
-import InteractiveWorkflow from "./components/InteractiveWorkflow";
-import QuoteSection from "./components/QuoteSection";
-import StatsGrid from "./components/StatsGrid";
-import FeatureSplit from "./components/FeatureSplit";
-import SocialCounter from "./components/SocialCounter";
 import PricingSection from "./components/PricingSection";
-import FinalCTA from "./components/FinalCTA";
 import Footer from "./components/Footer";
 import WorkableModal from "./components/WorkableModal";
-import CustomCursor from "./components/CustomCursor";
 import UserDashboard from "./components/UserDashboard";
+import CustomCursor from "./components/CustomCursor";
+import { initAuth, logout as firebaseLogout } from "./lib/firebase";
 
 export default function App() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [userSession, setUserSession] = useState<{ email: string; name: string } | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | "case-study" | "attach" | "verify" | "enquiry" | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
@@ -41,46 +34,46 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalScroll > 0) {
-        const progress = (window.scrollY / totalScroll) * 100;
-        setScrollProgress(progress);
+    const unsubscribe = initAuth(
+      (user) => {
+        setUserSession({
+          email: user.email || "",
+          name: user.displayName || "Atelier Architect"
+        });
+      },
+      () => {
+        setUserSession(null);
+      }
+    );
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
       }
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLoginSuccess = (email: string, name: string) => {
     setUserSession({ email, name });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await firebaseLogout();
+    } catch (err) {
+      console.error("Firebase logout error:", err);
+    }
     setUserSession(null);
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFC] dark:bg-[#161316] text-[#161316] dark:text-[#BABABA] selection:bg-[#FF6D29]/20 selection:text-neutral-900 transition-colors duration-300">
-      {/* Dynamic Animated Interactive Cursor */}
-      <CustomCursor />
-
-      {/* Elegant minimalist scroll progress bar */}
-      <div className="fixed top-0 left-0 w-full h-[2px] bg-black/[0.04] dark:bg-white/[0.04] z-[100] pointer-events-none">
-        <div
-          className="h-full bg-[#FF6D29] transition-all duration-75 ease-out"
-          style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
+    <div className="min-h-screen bg-[#F3F4F5] dark:bg-[#100C08] text-[#100C08] dark:text-[#DBE0E1] selection:bg-[#FF9408]/20 selection:text-neutral-900 transition-colors duration-300">
 
       {/* Floating Theme Toggle Pill */}
       <div className="fixed top-24 right-6 md:right-8 z-[150]">
         <button
           id="theme-toggle-btn"
           onClick={() => setTheme((prev) => (prev === "light" ? "midnight" : "light"))}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#453027]/30 hover:bg-neutral-50 dark:hover:bg-[#453027]/50 text-[#161316] dark:text-[#BABABA] border border-black/10 dark:border-[#453027]/50 shadow-lg backdrop-blur-md transition-all duration-300 rounded-full cursor-pointer group active:scale-95"
+          className="flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#1E293B]/30 hover:bg-neutral-50 dark:hover:bg-[#1E293B]/50 text-[#0B0F19] dark:text-[#BABABA] border border-black/10 dark:border-[#1E293B]/50 shadow-lg backdrop-blur-md transition-all duration-300 rounded-full cursor-pointer group active:scale-95"
           title={`Switch to ${theme === "light" ? "Midnight Dark" : "Light"} Mode`}
         >
           {theme === "light" ? (
@@ -129,42 +122,14 @@ export default function App() {
           </section>
         )}
 
-        {/* 3. Logos Marquee Bar */}
-        <LogosBar />
-
-        {/* 4. Tiered Statement Summary */}
+        {/* 3. Tiered Statement Summary */}
         <OverviewSection />
 
-        {/* 4.5 n8n-Style Interactive Workflow Sandbox */}
-        <InteractiveWorkflow />
-
-        {/* 5. Stunning Review Quote Banner with audio wave player */}
-        <QuoteSection
-          openCaseStudyModal={() => setActiveModal("case-study")}
-        />
-
-        {/* 6. Dynamic Stats Grid */}
-        <StatsGrid
-          openVerifyModal={() => setActiveModal("verify")}
-        />
-
-        {/* 7. Setup Onboarding On-Click Steps */}
-        <FeatureSplit />
-
-        {/* 8. Tasks Completed Dynamically Counting Up Log Panel */}
-        <SocialCounter />
-
-        {/* 8.5 Visual Pricing Tier Matrix */}
+        {/* 4. Visual Pricing Tier Matrix */}
         <PricingSection openEnquiryModal={() => setActiveModal("enquiry")} />
-
-        {/* 9. Final CTA with wildflower sunset scene */}
-        <FinalCTA
-          openRegisterModal={() => setActiveModal("register")}
-          openEnquiryModal={() => setActiveModal("enquiry")}
-        />
       </main>
 
-      {/* 10. Complete Footer */}
+      {/* 5. Complete Footer */}
       <Footer openModal={(type) => setActiveModal(type)} />
 
       {/* Shared Workable Modals container */}
@@ -176,6 +141,9 @@ export default function App() {
         attachedFiles={attachedFiles}
         setAttachedFiles={setAttachedFiles}
       />
+
+      {/* Dynamic Cursor tracking */}
+      <CustomCursor />
     </div>
   );
 }

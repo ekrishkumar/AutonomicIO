@@ -1,35 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --color-brand-bg: #FAFAFC;
-  --color-brand-dark: #161316;
-  --color-brand-earthy: #453027;
-  --color-brand-coral: #EA6113;
-  --color-brand-coral-hover: #F88F22;
-  --color-brand-coral-glow: rgba(234, 97, 19, 0.15);
-  --color-brand-gray: #BABABA;
-  --color-brand-accent: #E2E8F0;
-  --color-sunset-orange: #EA6113;
-  --color-sunset-mid: #F88F22;
-  --color-sunset-gold: #FBB931;
-  --color-sunset-peach: #FFE3B3;
+  --color-brand-bg: #F3F4F5;
+  --color-brand-dark: #100C08;
+  --color-brand-earthy: #1C130E;
+  --color-brand-coral: #CA3F16;
+  --color-brand-coral-hover: #95122C;
+  --color-brand-coral-glow: rgba(202, 63, 22, 0.15);
+  --color-brand-gray: #7F7368;
+  --color-brand-accent: #DBE0E1;
+  --color-sunset-orange: #FF9408;
+  --color-sunset-mid: #CA3F16;
+  --color-sunset-gold: #95122C;
+  --color-sunset-peach: #DBE0E1;
+  --color-premium-blue: #CA3F16;
+  --color-premium-blue-hover: #95122C;
+  --color-premium-blue-glow: rgba(202, 63, 22, 0.15);
+  --color-electric-blue: #FF9408;
+  --color-ice-cyan: #DBE0E1;
 }
 
 @layer base {
   body {
-    @apply bg-[#FAFAFC] text-[#161316] dark:bg-[#161316] dark:text-[#BABABA] font-sans antialiased selection:bg-[#FF6D29]/20 selection:text-neutral-900 transition-colors duration-300;
+    @apply bg-[#F3F4F5] text-[#100C08] dark:bg-[#100C08] dark:text-[#DBE0E1] font-sans antialiased selection:bg-[#FF9408]/20 selection:text-neutral-900 transition-colors duration-300;
   }
 }
 
 /* n8n brand dotted grid canvas style */
 .n8n-dot-grid {
-  background-image: radial-gradient(#161316 1px, transparent 1px);
+  background-image: radial-gradient(#100C08 1px, transparent 1px);
   background-size: 20px 20px;
   opacity: 0.05;
 }
@@ -44,33 +49,33 @@
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .n8n-glow-hover:hover {
-  box-shadow: 0 10px 30px -10px rgba(234, 97, 19, 0.12);
-  border-color: rgba(234, 97, 19, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(254, 148, 8, 0.12);
+  border-color: rgba(254, 148, 8, 0.3);
 }
 
 .dark .n8n-glow-hover:hover {
-  box-shadow: 0 10px 30px -10px rgba(234, 97, 19, 0.2);
-  border-color: rgba(234, 97, 19, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(254, 148, 8, 0.2);
+  border-color: rgba(254, 148, 8, 0.4);
 }
 
 .n8n-gradient-coral {
-  @apply bg-gradient-to-r from-sunset-orange via-sunset-gold to-sunset-peach;
+  @apply bg-gradient-to-r from-sunset-orange via-sunset-mid to-sunset-gold;
 }
 
 .n8n-node-border {
-  @apply border-[#E2E8F0] dark:border-[#453027]/40;
+  @apply border-[#E2E8F0] dark:border-[#1C130E]/40;
 }
 
 /* Custom editorial divider line animations */
 .editorial-border {
-  @apply border-black/5 dark:border-[#453027]/40;
+  @apply border-black/5 dark:border-[#1C130E]/40;
 }
 
 .editorial-divider {
-  @apply h-[1px] bg-black/5 dark:bg-[#453027]/40 w-full;
+  @apply h-[1px] bg-black/5 dark:bg-[#1C130E]/40 w-full;
 }
 
 .editorial-badge {
-  @apply text-[9px] uppercase tracking-[0.3em] font-semibold text-[#FF6D29] dark:text-[#FF6D29]/90 bg-[#FF6D29]/5 dark:bg-[#FF6D29]/10 px-2 py-0.5 rounded-full;
+  @apply text-[9px] uppercase tracking-[0.3em] font-semibold text-sunset-mid dark:text-sunset-orange bg-sunset-mid/5 dark:bg-sunset-orange/10 px-2 py-0.5 rounded-full;
 }
 

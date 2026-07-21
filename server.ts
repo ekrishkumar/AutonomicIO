@@ -125,6 +125,116 @@ Always maintain an ultra-clean, elegant, and professional tone. Do not use gener
     }
   });
 
+  // POST endpoint for interactive AI conversational chat assistant (Streaming)
+  app.post("/api/chat", async (req, res) => {
+    // Set headers for Server-Sent Events (SSE)
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    try {
+      const { prompt, history } = req.body;
+      if (!prompt || typeof prompt !== "string") {
+        res.write(`data: ${JSON.stringify({ error: "Prompt is required" })}\n\n`);
+        return res.end();
+      }
+
+      // If AI Client is not initialized, stream high-fidelity tailored local answers
+      if (!ai) {
+        const query = prompt.toLowerCase();
+        let fallbackText = "I am the Autonomic I/O co-pilot. I can help explain our active workflow templates, customization options, or guide you through setting up user pipelines. Feel free to ask about our services, pricing plans, or client case studies!";
+
+        if (query.includes("service") || query.includes("offer") || query.includes("what do you do") || query.includes("capability")) {
+          fallbackText = `Autonomic I/O provides enterprise-grade AI automation pipelines across four core capabilities:
+  
+• ⚙️ Workspace Orchestration: Seamlessly syncing business tools like Slack, Jira, GitHub, and Google Calendar.
+• 🧠 Custom AI Workers: Tailor-made agents trained specifically on your custom documents and guidelines.
+• 🔒 Continuous Security & Testing: Simulating heavy workloads and enforcing strict safety guardrails.
+• 📊 Data Analysis & Mapping: Transforming unstructured feedback logs into structured vector stores.`;
+        } else if (query.includes("price") || query.includes("pricing") || query.includes("cost") || query.includes("plan")) {
+          fallbackText = `We offer three flexible tiers designed to grow with your needs:
+
+• Creator ($0/mo Sandbox): Perfect for building prototypes. Includes 2 active pipelines, 1,000 runs/mo, and community support.
+• Startup ($79/mo): Up to 15 active pipelines, 25,000 runs/mo, webhooks, and priority template access.
+• Enterprise (Custom Quote): Unlimited pipelines, private LLMs, customized PostgreSQL/Spanner database syncing, and dedicated SLA support.`;
+        } else if (query.includes("case study") || query.includes("portfolio") || query.includes("stripe") || query.includes("customer") || query.includes("work")) {
+          fallbackText = `Our featured success story is with Stripe:
+  
+• Challenge: Manual extraction of tier levels from contract files was slow and prone to human typos.
+• Solution: Autonomic built an automated ingest pipeline checking Drive, parsing terms with custom agents, and populating tables.
+• Result: Reduced processing time by 98%, handling over 14,000 contracts with complete accuracy.`;
+        } else if (query.includes("agent") || query.includes("build") || query.includes("how to")) {
+          fallbackText = `Building custom agents on Autonomic I/O is simple:
+  
+1. Register for a free Creator Sandbox Account.
+2. Open the Interactive Workflow Editor on the dashboard.
+3. Configure your Trigger (e.g., Webhook or Slack listener).
+4. Connect an AI Agent Parser Node trained on your specified files.
+5. Setup an Action Node (e.g., Database Insert or email notification).
+6. Click "Deploy Pipeline" to push it live in 1-click!`;
+        }
+
+        const fullText = `✨ [Co-Pilot Local Mode]\n\n${fallbackText}`;
+        
+        // Stream the fallback text in small chunks to simulate a live generation experience
+        const chunkSize = 12;
+        for (let i = 0; i < fullText.length; i += chunkSize) {
+          const chunk = fullText.slice(i, i + chunkSize);
+          res.write(`data: ${JSON.stringify({ text: chunk })}\n\n`);
+          await new Promise((resolve) => setTimeout(resolve, 15));
+        }
+        res.write("data: [DONE]\n\n");
+        return res.end();
+      }
+
+      const systemInstruction = `You are the Autonomic I/O conversational AI Co-pilot assistant.
+You are embedded as an interactive chat widget on the Autonomic I/O homepage (an elite, premium AI Automation Agency on par with Stripe, OpenAI, and Vercel).
+Your goal is to assist website visitors, answer questions about our services, pricing, and case studies, and convert them into prospective clients.
+
+Here are key details about Autonomic I/O to use when answering:
+1. SERVICES: We offer Workspace Orchestration (connecting tools like Slack, Jira, GitHub, Gmail), Custom AI Workers/Agents (trained on custom business assets), Continuous Testing/Verification, and Data Analysis.
+2. PRICING: Creator (Free Sandbox, 2 pipelines, 1k tokens), Startup ($79/mo, 15 pipelines, 25k tokens), Enterprise (Custom, unlimited pipelines, private LLMs, Postgres/Spanner database integrations).
+3. CASE STUDY: Partnered with Stripe to automate contract tier extraction from Google Docs, reducing processing times by 98% (over 14k contracts successfully processed).
+4. TONE: Highly intelligent, polite, technical, clear, and action-oriented. Keep your answers concise, scannable (using bullet points where appropriate), and exciting. Encourage the user to register or submit an Enquiry using the pricing form.
+5. CONTEXT: Answer based on the previous conversation history provided. If they ask to sign up or submit an enquiry, guide them to click "Get Started" in the navbar or "Enquiry Now" in the pricing section.`;
+
+      // Structure contents with the full chat history for multi-turn conversational memory
+      let formattedHistory = [];
+      if (Array.isArray(history) && history.length > 0) {
+        const firstUserIdx = history.findIndex(msg => msg.role === "user");
+        if (firstUserIdx !== -1) {
+          formattedHistory = history.slice(firstUserIdx);
+        } else {
+          formattedHistory = [{ role: "user", parts: [{ text: prompt }] }];
+        }
+      } else {
+        formattedHistory = [{ role: "user", parts: [{ text: prompt }] }];
+      }
+
+      const responseStream = await ai.models.generateContentStream({
+        model: "gemini-3.5-flash",
+        contents: formattedHistory,
+        config: {
+          systemInstruction: systemInstruction,
+        }
+      });
+
+      for await (const chunk of responseStream) {
+        const text = chunk.text;
+        if (text) {
+          res.write(`data: ${JSON.stringify({ text })}\n\n`);
+        }
+      }
+
+      res.write("data: [DONE]\n\n");
+      res.end();
+    } catch (error: any) {
+      console.error("AI Co-pilot Chat Error:", error);
+      res.write(`data: ${JSON.stringify({ error: error?.message || "An error occurred in AI Co-pilot" })}\n\n`);
+      res.end();
+    }
+  });
+
   // POST endpoint to record client enquiry
   app.post("/api/enquiry", async (req, res) => {
     try {
@@ -136,6 +246,7 @@ Always maintain an ultra-clean, elegant, and professional tone. Do not use gener
       console.log("Saving client enquiry details:", { name, email, company, workspaceNeeds });
 
       let record;
+      let isFallback = false;
       try {
         // Attempt insert via Drizzle ORM
         const inserted = await db.insert(enquiries).values({
@@ -160,9 +271,10 @@ Always maintain an ultra-clean, elegant, and professional tone. Do not use gener
         };
         mockEnquiries.push(newRecord);
         record = newRecord;
+        isFallback = true;
       }
 
-      return res.status(200).json({ success: true, enquiry: record });
+      return res.status(200).json({ success: true, enquiry: record, isFallback, databaseType: isFallback ? "Local Memory Store" : "PostgreSQL Cluster" });
     } catch (error: any) {
       console.error("Enquiry submission error:", error);
       return res.status(500).json({ error: error?.message || "Internal server error." });
@@ -173,6 +285,7 @@ Always maintain an ultra-clean, elegant, and professional tone. Do not use gener
   app.get("/api/enquiries", async (req, res) => {
     try {
       let results;
+      let isFallback = false;
       try {
         // Attempt fetch via Drizzle ORM
         results = await db.select().from(enquiries).orderBy(desc(enquiries.id));
@@ -181,8 +294,9 @@ Always maintain an ultra-clean, elegant, and professional tone. Do not use gener
         console.warn("⚠️ PostgreSQL select failed or unconfigured, returning memory store records:", dbError);
         // Return sorted in-memory enquiries copy (newest first)
         results = [...mockEnquiries].sort((a, b) => b.id - a.id);
+        isFallback = true;
       }
-      return res.status(200).json({ enquiries: results });
+      return res.status(200).json({ enquiries: results, isFallback, databaseType: isFallback ? "Local Memory Store" : "PostgreSQL Cluster" });
     } catch (error: any) {
       console.error("Enquiries retrieval error:", error);
       return res.status(500).json({ error: error?.message || "Internal server error." });

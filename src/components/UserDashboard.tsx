@@ -39,6 +39,9 @@ export interface EnquiryRecord {
 export default function UserDashboard({ userSession, onLogout }: UserDashboardProps) {
   const [enquiries, setEnquiries] = useState<EnquiryRecord[]>([]);
   const [isLoadingEnquiries, setIsLoadingEnquiries] = useState(false);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [databaseType, setDatabaseType] = useState<string>("Detecting...");
+  const [isDbFallback, setIsDbFallback] = useState<boolean>(true);
   const [tokenUsage, setTokenUsage] = useState(4120);
   const maxTokens = 5000;
   const [logs, setLogs] = useState<string[]>([
@@ -48,6 +51,7 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
     "Awaiting active token triggers..."
   ]);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<"synced" | "syncing">("synced");
   const [activeTab, setActiveTab] = useState<"overview" | "database" | "terminal">("overview");
 
   // Fetch registered enquiries from backend database
@@ -58,6 +62,8 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
       if (res.ok) {
         const data = await res.json();
         setEnquiries(data.enquiries || []);
+        setDatabaseType(data.databaseType || (data.isFallback ? "Local Memory Store" : "PostgreSQL Cluster"));
+        setIsDbFallback(data.isFallback ?? true);
       }
     } catch (err) {
       console.error("Error fetching enquiries:", err);
@@ -68,11 +74,20 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
 
   useEffect(() => {
     fetchEnquiries();
+    const timer = setTimeout(() => {
+      setIsDashboardLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
   }, []);
+
+  if (isDashboardLoading) {
+    return <UserDashboardSkeleton />;
+  }
 
   const simulateWorkflow = () => {
     if (isSimulating) return;
     setIsSimulating(true);
+    setSyncStatus("syncing");
     setTokenUsage(prev => Math.min(prev + 45, maxTokens));
     
     const newLogs = [
@@ -89,6 +104,7 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
         setLogs(prev => [log, ...prev.slice(0, 15)]);
         if (index === newLogs.length - 1) {
           setIsSimulating(false);
+          setSyncStatus("synced");
         }
       }, (index + 1) * 800);
     });
@@ -105,13 +121,33 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
             A
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm font-bold text-[#14161D] dark:text-white uppercase tracking-wider font-mono">
                 Atelier Workspace
               </h2>
               <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[9px] font-bold uppercase tracking-widest border border-emerald-500/20">
                 Active Node
               </span>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-neutral-200/40 dark:bg-white/5 border border-black/5 dark:border-white/5 font-mono select-none">
+                {syncStatus === "syncing" ? (
+                  <>
+                    <RefreshCw className="w-2.5 h-2.5 text-amber-500 animate-spin" />
+                    <span className="text-[8px] uppercase tracking-[0.05em] font-bold text-amber-600 dark:text-amber-400">
+                      Syncing to Firestore...
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[8px] uppercase tracking-[0.05em] font-bold text-emerald-600 dark:text-emerald-400">
+                      Autosaved to Firestore
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-light">
               Autonomous automation portal & PostgreSQL database terminal
@@ -200,8 +236,8 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-neutral-400 dark:text-neutral-500">Durable Storage</span>
-                      <span className="font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-1">
-                        <Database className="w-3.5 h-3.5 text-[#FF6D29]" /> PG-POOL
+                      <span className={`font-semibold flex items-center gap-1 ${isDbFallback ? "text-amber-500" : "text-emerald-500"}`} title={databaseType}>
+                        <Database className="w-3.5 h-3.5 text-[#FF6D29]" /> {isDbFallback ? "SANDBOX FALLBACK" : "POSTGRES LIVE"}
                       </span>
                     </div>
                   </div>
@@ -316,23 +352,32 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
               exit={{ opacity: 0, y: -5 }}
               className="space-y-6"
             >
-              <div className="flex justify-between items-center border-b border-black/5 dark:border-white/5 pb-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-black/5 dark:border-white/5 pb-4 gap-4">
                 <div>
                   <h3 className="text-sm font-bold text-[#14161D] dark:text-white uppercase tracking-wider font-mono flex items-center gap-2">
                     <Database className="w-4 h-4 text-[#FF6D29]" /> Cloud SQL enquiries ledger
                   </h3>
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500 font-light">
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500 font-light mt-0.5">
                     This ledger pulls live enquiries dynamically from our remote PostgreSQL cluster server.
                   </p>
                 </div>
-                <button
-                  onClick={fetchEnquiries}
-                  disabled={isLoadingEnquiries}
-                  className="p-1.5 rounded border border-black/10 dark:border-white/10 hover:bg-neutral-50 dark:hover:bg-white/5 text-xs flex items-center gap-1.5 cursor-pointer text-neutral-700 dark:text-neutral-300 transition-all"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingEnquiries ? "animate-spin text-[#FF6D29]" : ""}`} />
-                  Refresh
-                </button>
+                <div className="flex items-center gap-3 self-end md:self-auto">
+                  <div className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${
+                    isDbFallback 
+                      ? "bg-amber-500/10 text-amber-500 border-amber-500/20" 
+                      : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                  }`}>
+                    Connection: {databaseType}
+                  </div>
+                  <button
+                    onClick={fetchEnquiries}
+                    disabled={isLoadingEnquiries}
+                    className="p-1.5 rounded border border-black/10 dark:border-white/10 hover:bg-neutral-50 dark:hover:bg-white/5 text-xs flex items-center gap-1.5 cursor-pointer text-neutral-700 dark:text-neutral-300 transition-all shadow-sm"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoadingEnquiries ? "animate-spin text-[#FF6D29]" : ""}`} />
+                    Refresh
+                  </button>
+                </div>
               </div>
 
               {isLoadingEnquiries ? (
@@ -430,6 +475,83 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+function UserDashboardSkeleton() {
+  return (
+    <div className="w-full bg-white dark:bg-[#0E1015] border border-black/5 dark:border-[#222630] rounded-xl shadow-xl overflow-hidden font-sans transition-all duration-300">
+      {/* Top Console Bar */}
+      <div className="bg-[#FAF9FA] dark:bg-[#161316] border-b border-black/5 dark:border-[#222630] px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 animate-pulse">
+          <div className="w-10 h-10 rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+          <div className="space-y-2">
+            <div className="w-32 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            <div className="w-48 h-3 bg-neutral-200/60 dark:bg-neutral-800/60 rounded" />
+          </div>
+        </div>
+        <div className="flex gap-2 animate-pulse">
+          <div className="w-20 h-8 bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+          <div className="w-24 h-8 bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+          <div className="w-20 h-8 bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Card Skeleton */}
+        <div className="bg-neutral-50/50 dark:bg-[#12141A] border border-black/5 dark:border-white/5 rounded-xl p-6 space-y-6 animate-pulse">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+            <div className="space-y-2 flex-1">
+              <div className="w-24 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+              <div className="w-36 h-3 bg-neutral-200/60 dark:bg-neutral-800/60 rounded" />
+            </div>
+          </div>
+          <div className="h-[1px] bg-neutral-200 dark:bg-neutral-800" />
+          <div className="space-y-3">
+            <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
+            <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-5/6" />
+            <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-4/5" />
+          </div>
+          <div className="h-8 bg-neutral-200 dark:bg-neutral-800 rounded w-full mt-6" />
+        </div>
+
+        {/* Center Card Skeleton */}
+        <div className="bg-neutral-50/50 dark:bg-[#12141A] border border-black/5 dark:border-white/5 rounded-xl p-6 space-y-6 animate-pulse">
+          <div className="flex justify-between items-center">
+            <div className="w-32 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            <div className="w-16 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+          </div>
+          <div className="space-y-3">
+            <div className="w-28 h-8 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            <div className="w-full h-2.5 bg-neutral-200 dark:bg-neutral-800 rounded-full" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-12 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            <div className="h-12 bg-neutral-200 dark:bg-[#1C181C]/50 rounded" />
+          </div>
+          <div className="h-9 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
+        </div>
+
+        {/* Right Card Skeleton */}
+        <div className="bg-neutral-50/50 dark:bg-[#12141A] border border-black/5 dark:border-white/5 rounded-xl p-6 space-y-4 animate-pulse">
+          <div className="flex justify-between items-center pb-2">
+            <div className="w-36 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            <div className="w-4 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+          </div>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex justify-between items-center py-1">
+              <div className="space-y-1.5 flex-1">
+                <div className="w-24 h-3.5 bg-neutral-200 dark:bg-neutral-800 rounded" />
+                <div className="w-32 h-2.5 bg-neutral-200/60 dark:bg-neutral-800/60 rounded" />
+              </div>
+              <div className="w-12 h-4 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

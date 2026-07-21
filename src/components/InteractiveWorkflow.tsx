@@ -80,6 +80,8 @@ export default function InteractiveWorkflow() {
     nodeType: "trigger" | "agent" | "router" | "true" | "false";
   } | null>(null);
 
+
+
   // Define standard available values for customizable dropdowns
   const availableModels = [
     "Gemini 2.5 Flash (Default)",
@@ -561,6 +563,84 @@ export default function InteractiveWorkflow() {
     });
   };
 
+  const [connections, setConnections] = useState({
+    trigToAgent: "",
+    agentToRouter: "",
+    routerToTrue: "",
+    routerToFalse: ""
+  });
+
+  const updateConnections = () => {
+    const container = document.getElementById("workflow-canvas-container");
+    if (!container) return;
+
+    const trig = document.getElementById(`node-${presets[activeTab].triggerNode.id}`);
+    const agent = document.getElementById(`node-${presets[activeTab].agentNode.id}`);
+    const router = document.getElementById(`node-${presets[activeTab].routerNode.id}`);
+    const trueNode = document.getElementById(`node-${presets[activeTab].trueNode.id}`);
+    const falseNode = document.getElementById(`node-${presets[activeTab].falseNode.id}`);
+
+    if (!trig || !agent || !router || !trueNode || !falseNode) return;
+
+    const rectContainer = container.getBoundingClientRect();
+    const rectTrig = trig.getBoundingClientRect();
+    const rectAgent = agent.getBoundingClientRect();
+    const rectRouter = router.getBoundingClientRect();
+    const rectTrue = trueNode.getBoundingClientRect();
+    const rectFalse = falseNode.getBoundingClientRect();
+
+    // Calculate middle-right connection point of a node
+    const getRightCenter = (rect: DOMRect) => ({
+      x: rect.right - rectContainer.left,
+      y: rect.top + rect.height / 2 - rectContainer.top
+    });
+
+    // Calculate middle-left connection point of a node
+    const getLeftCenter = (rect: DOMRect) => ({
+      x: rect.left - rectContainer.left,
+      y: rect.top + rect.height / 2 - rectContainer.top
+    });
+
+    const pTrigRight = getRightCenter(rectTrig);
+    const pAgentLeft = getLeftCenter(rectAgent);
+    const pAgentRight = getRightCenter(rectAgent);
+    const pRouterLeft = getLeftCenter(rectRouter);
+    const pRouterRight = getRightCenter(rectRouter);
+    const pTrueLeft = getLeftCenter(rectTrue);
+    const pFalseLeft = getLeftCenter(rectFalse);
+
+    // Create curved n8n-style cubic bezier paths
+    const cp1 = pTrigRight.x + (pAgentLeft.x - pTrigRight.x) * 0.45;
+    const trigToAgent = `M ${pTrigRight.x} ${pTrigRight.y} C ${cp1} ${pTrigRight.y}, ${cp1} ${pAgentLeft.y}, ${pAgentLeft.x} ${pAgentLeft.y}`;
+
+    const cp2 = pAgentRight.x + (pRouterLeft.x - pAgentRight.x) * 0.45;
+    const agentToRouter = `M ${pAgentRight.x} ${pAgentRight.y} C ${cp2} ${pAgentRight.y}, ${cp2} ${pRouterLeft.y}, ${pRouterLeft.x} ${pRouterLeft.y}`;
+
+    const cp3 = pRouterRight.x + (pTrueLeft.x - pRouterRight.x) * 0.45;
+    const routerToTrue = `M ${pRouterRight.x} ${pRouterRight.y} C ${cp3} ${pRouterRight.y}, ${cp3} ${pTrueLeft.y}, ${pTrueLeft.x} ${pTrueLeft.y}`;
+
+    const cp4 = pRouterRight.x + (pFalseLeft.x - pRouterRight.x) * 0.45;
+    const routerToFalse = `M ${pRouterRight.x} ${pRouterRight.y} C ${cp4} ${pRouterRight.y}, ${cp4} ${pFalseLeft.y}, ${pFalseLeft.x} ${pFalseLeft.y}`;
+
+    setConnections({
+      trigToAgent,
+      agentToRouter,
+      routerToTrue,
+      routerToFalse
+    });
+  };
+
+  useEffect(() => {
+    // Wait a brief tick for render to layout DOM elements, then calculate coordinates
+    const timer = setTimeout(updateConnections, 120);
+    
+    window.addEventListener("resize", updateConnections);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateConnections);
+    };
+  }, [activeTab, selectedNode, presets, isPlaying, currentStep]);
+
   const currentPreset = presets[activeTab];
 
   // Helper check for active state in animation loop
@@ -570,18 +650,18 @@ export default function InteractiveWorkflow() {
   };
 
   return (
-    <section id="interactive-workflow-section" className="py-24 px-6 sm:px-10 lg:px-12 bg-[#FAFAFC] dark:bg-[#121012] border-b border-[#E2E8F0] dark:border-[#453027]/40 transition-colors duration-300 relative overflow-hidden">
+    <section id="interactive-workflow-section" className="py-24 px-6 sm:px-10 lg:px-12 bg-[#F3F4F5] dark:bg-[#100C08] border-b border-[#E2E8F0] dark:border-[#1C130E]/40 transition-colors duration-300 relative overflow-hidden">
       <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
       
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-sunset-orange/20 bg-sunset-orange/5 text-[10px] font-mono font-bold uppercase tracking-wider text-sunset-orange">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#CA3F16]/20 bg-[#CA3F16]/5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#CA3F16]">
             <Zap className="w-3.5 h-3.5" />
             <span>Interactive Node Sandbox</span>
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold tracking-tight text-[#14161D] dark:text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold tracking-tight text-[#14161D] dark:text-white leading-tight">
             Click & customize active pipelines
           </h2>
           <p className="text-sm font-light text-[#14161D]/60 dark:text-[#BABABA]/60 max-w-xl mx-auto">
@@ -590,12 +670,12 @@ export default function InteractiveWorkflow() {
         </div>
 
         {/* Master Container resembling n8n dark canvas */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-white dark:bg-[#161316] border border-[#E2E8F0] dark:border-[#453027]/40 rounded-xl overflow-hidden shadow-2xl min-h-[640px] relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-white dark:bg-[#1C130E] border border-[#E2E8F0] dark:border-[#1C130E]/40 rounded-xl overflow-hidden shadow-2xl min-h-[640px] relative">
           
           {/* LEFT SIDEBAR: Clickable Use-case tabs (Col-span 4) */}
-          <div className="lg:col-span-3 border-r border-[#E2E8F0] dark:border-[#453027]/40 bg-[#FAFAFC] dark:bg-[#141214] flex flex-col justify-between">
+          <div className="lg:col-span-3 border-r border-[#E2E8F0] dark:border-[#1C130E]/40 bg-[#F3F4F5] dark:bg-[#100C08] flex flex-col justify-between">
             <div className="p-4 space-y-2">
-              <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-black/40 dark:text-[#BABABA]/40 px-3 pb-3 border-b border-black/5 dark:border-[#453027]/20">
+              <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-black/40 dark:text-[#BABABA]/40 px-3 pb-3 border-b border-black/5 dark:border-slate-800/40">
                 Workflow Presets
               </div>
               
@@ -615,16 +695,16 @@ export default function InteractiveWorkflow() {
                       }}
                       className={`w-full text-left p-3.5 rounded-lg border transition-all duration-300 relative group flex items-start gap-3.5 ${
                         isActive
-                          ? "bg-white dark:bg-[#1C181C] border-sunset-orange/40 dark:border-sunset-orange/40 shadow-sm"
+                          ? "bg-white dark:bg-[#1C181C] border-[#1E6091]/40 dark:border-[#1E6091]/40 shadow-sm"
                           : "bg-transparent border-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
                       }`}
                     >
                       {/* Left side indicator colored bar */}
                       {isActive && (
-                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-sunset-orange rounded-r-full" />
+                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#1E6091] rounded-r-full" />
                       )}
                       
-                      <div className={`p-2 rounded-md ${isActive ? "bg-sunset-orange/10 text-sunset-orange" : "bg-black/5 dark:bg-white/5 text-black/40 dark:text-[#BABABA]/40 group-hover:text-sunset-orange"}`}>
+                      <div className={`p-2 rounded-md ${isActive ? "bg-[#1E6091]/10 text-[#1E6091]" : "bg-black/5 dark:bg-white/5 text-black/40 dark:text-[#BABABA]/40 group-hover:text-[#1E6091]"}`}>
                         <IconComponent className="w-4 h-4" />
                       </div>
 
@@ -643,11 +723,11 @@ export default function InteractiveWorkflow() {
             </div>
 
             {/* Run Button Panel at Bottom of sidebar */}
-            <div className="p-4 bg-white dark:bg-[#161316] border-t border-[#E2E8F0] dark:border-[#453027]/40 space-y-3">
+            <div className="p-4 bg-white dark:bg-[#0A0D14] border-t border-[#E2E8F0] dark:border-[#1E293B]/30 space-y-3">
               <button
                 onClick={handlePlaySimulation}
                 disabled={isPlaying}
-                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-sunset-orange via-sunset-mid to-sunset-gold hover:opacity-95 text-white flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-bold transition-all disabled:opacity-40 cursor-pointer shadow-[0_4px_14px_rgba(234,97,19,0.35)] active:scale-98"
+                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-[#1E6091] via-[#3A86C8] to-[#7EBAF1] hover:opacity-95 text-white flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-bold transition-all disabled:opacity-40 cursor-pointer shadow-[0_4px_14px_rgba(30,96,145,0.35)] active:scale-98"
               >
                 {isPlaying ? (
                   <>
@@ -669,9 +749,9 @@ export default function InteractiveWorkflow() {
           </div>
 
           {/* RIGHT SIDE: Interactive SVG Workflow Canvas (Col-span 9) */}
-          <div className="lg:col-span-9 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden bg-[#FAFAFC] dark:bg-[#121012] min-h-[500px]">
+          <div id="workflow-canvas-container" className="lg:col-span-9 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden bg-[#FAFAFC] dark:bg-[#121012] min-h-[500px]">
             {/* Grid overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#302824_1.2px,transparent_1.2px)] [background-size:16px_16px] pointer-events-none opacity-80" />
+            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#1e293b_1.2px,transparent_1.2px)] [background-size:16px_16px] pointer-events-none opacity-80" />
             
             {/* CANVAS INTERFACE */}
             <div className="relative flex-1 flex flex-col items-center justify-center z-10 w-full">
@@ -679,68 +759,50 @@ export default function InteractiveWorkflow() {
               {/* Dynamic SVG Connection paths drawing lines between the nodes */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none hidden md:block" style={{ zIndex: 0 }}>
                 {/* Connection 1: Trigger -> Agent */}
-                <path
-                  d="M 175 180 Q 250 180, 270 180"
-                  fill="none"
-                  stroke={isNodeActive(currentPreset.triggerNode.id) || isNodeActive(currentPreset.agentNode.id) ? "#EA6113" : "#E2E8F0"}
-                  className="transition-colors duration-300 dark:stroke-[#302824]"
-                  strokeWidth="2.5"
-                />
+                {connections.trigToAgent && (
+                  <path
+                    d={connections.trigToAgent}
+                    fill="none"
+                    stroke={isNodeActive(currentPreset.triggerNode.id) || isNodeActive(currentPreset.agentNode.id) ? "#1E6091" : "#E2E8F0"}
+                    className="transition-all duration-300 dark:stroke-[#334155]"
+                    strokeWidth="2.5"
+                  />
+                )}
                 
-                {/* Agent sub-connections (Dashed curves) */}
-                <path
-                  d="M 360 215 Q 360 280, 280 320"
-                  fill="none"
-                  stroke="#EA6113"
-                  strokeDasharray="4 4"
-                  className="opacity-40"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M 360 215 Q 360 280, 360 320"
-                  fill="none"
-                  stroke="#EA6113"
-                  strokeDasharray="4 4"
-                  className="opacity-40"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M 360 215 Q 360 280, 440 320"
-                  fill="none"
-                  stroke="#EA6113"
-                  strokeDasharray="4 4"
-                  className="opacity-40"
-                  strokeWidth="1.5"
-                />
-
                 {/* Connection 2: Agent -> Router */}
-                <path
-                  d="M 450 180 Q 470 180, 495 180"
-                  fill="none"
-                  stroke={isNodeActive(currentPreset.agentNode.id) || isNodeActive(currentPreset.routerNode.id) ? "#EA6113" : "#E2E8F0"}
-                  className="transition-colors duration-300 dark:stroke-[#302824]"
-                  strokeWidth="2.5"
-                />
+                {connections.agentToRouter && (
+                  <path
+                    d={connections.agentToRouter}
+                    fill="none"
+                    stroke={isNodeActive(currentPreset.agentNode.id) || isNodeActive(currentPreset.routerNode.id) ? "#1E6091" : "#E2E8F0"}
+                    className="transition-all duration-300 dark:stroke-[#334155]"
+                    strokeWidth="2.5"
+                  />
+                )}
 
-                {/* Connection 3: Router -> True Node (top curve) */}
-                <path
-                  d="M 590 165 Q 630 110, 680 110"
-                  fill="none"
-                  stroke={isNodeActive(currentPreset.trueNode.id) ? "#EA6113" : "#E2E8F0"}
-                  className="transition-colors duration-300 dark:stroke-[#302824]"
-                  strokeWidth="2.5"
-                />
+                {/* Connection 3: Router -> True Node */}
+                {connections.routerToTrue && (
+                  <path
+                    d={connections.routerToTrue}
+                    fill="none"
+                    stroke={isNodeActive(currentPreset.trueNode.id) ? "#10B981" : "#E2E8F0"}
+                    className="transition-all duration-300 dark:stroke-[#334155]"
+                    strokeWidth="2.5"
+                  />
+                )}
 
-                {/* Connection 4: Router -> False Node (bottom curve) */}
-                <path
-                  d="M 590 195 Q 630 250, 680 250"
-                  fill="none"
-                  stroke={isNodeActive(currentPreset.falseNode.id) ? "#EA6113" : "#E2E8F0"}
-                  className="transition-colors duration-300 dark:stroke-[#302824]"
-                  strokeWidth="2.5"
-                />
+                {/* Connection 4: Router -> False Node */}
+                {connections.routerToFalse && (
+                  <path
+                    d={connections.routerToFalse}
+                    fill="none"
+                    stroke={isNodeActive(currentPreset.falseNode.id) ? "#6B7280" : "#E2E8F0"}
+                    className="transition-all duration-300 dark:stroke-[#334155]"
+                    strokeWidth="2.5"
+                  />
+                )}
               </svg>
-
+ 
               {/* NODE LAYOUT GRID */}
               <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-y-12 md:gap-x-4 items-center justify-center pt-8">
                 
@@ -748,21 +810,22 @@ export default function InteractiveWorkflow() {
                 <div className="md:col-span-3 flex justify-center z-10">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
+                    id={`node-${currentPreset.triggerNode.id}`}
                     onClick={() => setSelectedNode({ id: currentPreset.triggerNode.id, name: currentPreset.triggerNode.name, nodeType: "trigger" })}
                     className={`w-44 p-4 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#181618] relative ${
                       isNodeActive(currentPreset.triggerNode.id)
-                        ? "border-sunset-orange shadow-[0_0_15px_rgba(234,97,19,0.25)] ring-2 ring-sunset-orange"
-                        : "border-[#E2E8F0] dark:border-[#453027]/40 hover:border-sunset-orange/40"
+                        ? "border-[#1E6091] shadow-[0_0_15px_rgba(30,96,145,0.25)] ring-2 ring-[#1E6091]"
+                        : "border-[#E2E8F0] dark:border-slate-800 hover:border-[#1E6091]/40"
                     }`}
                   >
-                    <div className="absolute -left-1 top-4 w-2 h-2 rounded-full bg-sunset-orange shadow" />
-                    <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#121012] flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-sunset-orange" />
+                    <div className="absolute -left-1 top-4 w-2 h-2 rounded-full bg-[#1E6091] shadow" />
+                    <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-[#1E6091] bg-white dark:bg-[#121012] flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#1E6091]" />
                     </div>
                     
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded bg-sunset-orange/10 text-sunset-orange">
-                        <Zap className="w-4 h-4 fill-sunset-orange" />
+                      <div className="p-1.5 rounded bg-[#1E6091]/10 text-[#1E6091]">
+                        <Zap className="w-4 h-4 fill-[#1E6091]" />
                       </div>
                       <div className="text-[10px] uppercase font-mono font-bold tracking-wider text-black/40 dark:text-[#BABABA]/40">Trigger</div>
                     </div>
@@ -770,29 +833,30 @@ export default function InteractiveWorkflow() {
                     <div className="text-[9px] text-black/50 dark:text-[#BABABA]/50 mt-1 truncate">{currentPreset.triggerNode.type}</div>
                   </motion.div>
                 </div>
-
+ 
                 {/* NODE 2: AI Agent with integrated Model, Memory, Tools (Cols 4-7) */}
                 <div className="md:col-span-4 flex flex-col items-center justify-center z-10">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
+                    id={`node-${currentPreset.agentNode.id}`}
                     onClick={() => setSelectedNode({ id: currentPreset.agentNode.id, name: currentPreset.agentNode.name, nodeType: "agent" })}
                     className={`w-52 p-4 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#181618] relative ${
                       isNodeActive(currentPreset.agentNode.id)
-                        ? "border-sunset-orange shadow-[0_0_15px_rgba(234,97,19,0.25)] ring-2 ring-sunset-orange"
-                        : "border-[#E2E8F0] dark:border-[#453027]/40 hover:border-sunset-orange/40"
+                        ? "border-[#1E6091] shadow-[0_0_15px_rgba(30,96,145,0.25)] ring-2 ring-[#1E6091]"
+                        : "border-[#E2E8F0] dark:border-slate-800 hover:border-[#1E6091]/40"
                     }`}
                   >
-                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#121012] z-20" />
-                    <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#121012] z-20" />
-
+                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-[#1E6091] bg-white dark:bg-[#121012] z-20" />
+                    <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-[#1E6091] bg-white dark:bg-[#121012] z-20" />
+ 
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded bg-sunset-orange/10 text-sunset-orange">
+                        <div className="p-1.5 rounded bg-[#1E6091]/10 text-[#1E6091]">
                           <Cpu className="w-4 h-4" />
                         </div>
                         <div className="text-[10px] uppercase font-mono font-bold tracking-wider text-black/40 dark:text-[#BABABA]/40">AI Agent</div>
                       </div>
-                      <span className="text-[8px] bg-sunset-orange/15 text-sunset-orange font-mono px-1 rounded uppercase font-bold">Active</span>
+                      <span className="text-[8px] bg-[#1E6091]/15 text-[#1E6091] font-mono px-1 rounded uppercase font-bold">Active</span>
                     </div>
                     <div className="text-xs font-bold text-[#14161D] dark:text-white truncate">{currentPreset.agentNode.name}</div>
                     <div className="text-[8px] text-emerald-500 font-mono mt-1 flex items-center gap-1">
@@ -800,35 +864,35 @@ export default function InteractiveWorkflow() {
                       {currentPreset.agentNode.model.split(" ")[0]}
                     </div>
                   </motion.div>
-
+ 
                   {/* AI Sub-Nodes attached below (Visible mainly on desktops) */}
                   <div className="hidden md:flex gap-4 mt-8 w-full justify-center">
                     {/* Chat Model Subnode */}
                     <div className="flex flex-col items-center">
-                      <div className="w-20 p-2 border border-black/5 dark:border-[#453027]/30 bg-neutral-50 dark:bg-[#141214] text-center rounded text-[8px] relative group hover:border-sunset-orange/30">
+                      <div className="w-20 p-2 border border-black/5 dark:border-slate-800/40 bg-neutral-50 dark:bg-[#141214] text-center rounded text-[8px] relative group hover:border-[#1E6091]/30">
                         <div className="font-bold text-[#14161D] dark:text-white truncate">Model</div>
-                        <div className="text-sunset-orange mt-0.5 font-mono truncate">{currentPreset.agentNode.model.split(" ")[0]}</div>
+                        <div className="text-[#1E6091] mt-0.5 font-mono truncate">{currentPreset.agentNode.model.split(" ")[0]}</div>
                       </div>
                     </div>
-
+ 
                     {/* Memory Subnode */}
                     <div className="flex flex-col items-center">
-                      <div className="w-20 p-2 border border-black/5 dark:border-[#453027]/30 bg-neutral-50 dark:bg-[#141214] text-center rounded text-[8px] relative hover:border-sunset-orange/30">
+                      <div className="w-20 p-2 border border-black/5 dark:border-slate-800/40 bg-neutral-50 dark:bg-[#141214] text-center rounded text-[8px] relative hover:border-[#1E6091]/30">
                         <div className="font-bold text-[#14161D] dark:text-white truncate">Memory</div>
-                        <div className="text-sunset-orange mt-0.5 font-mono truncate">{currentPreset.agentNode.memory.split(" ")[0]}</div>
+                        <div className="text-[#1E6091] mt-0.5 font-mono truncate">{currentPreset.agentNode.memory.split(" ")[0]}</div>
                       </div>
                     </div>
-
+ 
                     {/* Tools Subnode Grid */}
                     <div className="flex flex-col items-center">
-                      <div className="p-2 border border-black/5 dark:border-[#453027]/30 bg-sunset-orange/5 text-sunset-orange rounded flex gap-1 items-center max-w-[110px]">
+                      <div className="p-2 border border-black/5 dark:border-slate-800/40 bg-[#1E6091]/5 text-[#1E6091] rounded flex gap-1 items-center max-w-[110px]">
                         <Plus className="w-2.5 h-2.5" />
                         <div className="grid grid-cols-2 gap-0.5">
                           {currentPreset.agentNode.tools.map((t, i) => {
                             const ToolIcon = t.icon;
                             return (
-                              <div key={i} title={t.name} className="w-3.5 h-3.5 rounded bg-white dark:bg-[#1C181C] border border-sunset-orange/15 flex items-center justify-center text-black/60 dark:text-white/80">
-                                <ToolIcon className="w-2 h-2" />
+                              <div key={i} title={t.name} className="w-3.5 h-3.5 rounded bg-white dark:bg-[#1C181C] border border-[#1E6091]/15 flex items-center justify-center text-black/60 dark:text-white/80">
+                                <ToolIcon className="w-2.5 h-2.5" />
                               </div>
                             );
                           })}
@@ -837,29 +901,30 @@ export default function InteractiveWorkflow() {
                     </div>
                   </div>
                 </div>
-
+ 
                 {/* NODE 3: Router Node (Cols 8-9) */}
                 <div className="md:col-span-2 flex justify-center z-10">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
+                    id={`node-${currentPreset.routerNode.id}`}
                     onClick={() => setSelectedNode({ id: currentPreset.routerNode.id, name: currentPreset.routerNode.name, nodeType: "router" })}
                     className={`w-36 p-4 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#181618] relative ${
                       isNodeActive(currentPreset.routerNode.id)
-                        ? "border-sunset-orange shadow-[0_0_15px_rgba(234,97,19,0.25)] ring-2 ring-sunset-orange"
-                        : "border-[#E2E8F0] dark:border-[#453027]/40 hover:border-sunset-orange/40"
+                        ? "border-[#1E6091] shadow-[0_0_15px_rgba(30,96,145,0.25)] ring-2 ring-[#1E6091]"
+                        : "border-[#E2E8F0] dark:border-slate-800 hover:border-[#1E6091]/40"
                     }`}
                   >
-                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#121012] z-20" />
+                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-[#1E6091] bg-white dark:bg-[#121012] z-20" />
                     
                     {/* Top branch connector */}
-                    <div className="absolute -right-1.5 top-[25%] w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#121012] z-20 flex items-center justify-center">
+                    <div className="absolute -right-1.5 top-[25%] w-3 h-3 rounded-full border-2 border-[#1E6091] bg-white dark:bg-[#121012] z-20 flex items-center justify-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     </div>
                     {/* Bottom branch connector */}
-                    <div className="absolute -right-1.5 top-[75%] w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#121012] z-20 flex items-center justify-center">
+                    <div className="absolute -right-1.5 top-[75%] w-3 h-3 rounded-full border-2 border-[#1E6091] bg-white dark:bg-[#121012] z-20 flex items-center justify-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
                     </div>
-
+ 
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <div className="p-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
                         <GitBranch className="w-3.5 h-3.5" />
@@ -870,20 +935,21 @@ export default function InteractiveWorkflow() {
                     <div className="text-[8px] font-mono text-black/40 dark:text-[#BABABA]/40 truncate mt-1">{currentPreset.routerNode.condition}</div>
                   </motion.div>
                 </div>
-
+ 
                 {/* NODE 4 & 5: True/False Endpoints (Cols 10-12 stacked) */}
                 <div className="md:col-span-3 flex flex-col gap-6 items-center justify-center z-10">
                   {/* True Node */}
                   <motion.div
                     whileHover={{ scale: 1.02 }}
+                    id={`node-${currentPreset.trueNode.id}`}
                     onClick={() => setSelectedNode({ id: currentPreset.trueNode.id, name: currentPreset.trueNode.name, nodeType: "true" })}
-                    className={`w-40 p-3 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#181618] relative ${
+                    className={`w-40 p-3 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#1C130E] relative ${
                       isNodeActive(currentPreset.trueNode.id)
-                        ? "border-sunset-orange shadow-[0_0_15px_rgba(234,97,19,0.25)] ring-2 ring-sunset-orange"
-                        : "border-[#E2E8F0] dark:border-[#453027]/40 hover:border-sunset-orange/40"
+                        ? "border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.25)] ring-2 ring-emerald-500"
+                        : "border-[#E2E8F0] dark:border-slate-800 hover:border-emerald-500/40"
                     }`}
                   >
-                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-emerald-500 bg-white dark:bg-[#121012] z-20" />
+                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-emerald-500 bg-white dark:bg-[#100C08] z-20" />
                     <div className="absolute -right-1 top-4 w-2 h-2 rounded-full bg-emerald-500 shadow" />
                     
                     <div className="flex items-center justify-between mb-1.5">
@@ -892,18 +958,19 @@ export default function InteractiveWorkflow() {
                     </div>
                     <div className="text-[10px] font-bold text-[#14161D] dark:text-white truncate">{currentPreset.trueNode.name}</div>
                   </motion.div>
-
+ 
                   {/* False Node */}
                   <motion.div
                     whileHover={{ scale: 1.02 }}
+                    id={`node-${currentPreset.falseNode.id}`}
                     onClick={() => setSelectedNode({ id: currentPreset.falseNode.id, name: currentPreset.falseNode.name, nodeType: "false" })}
-                    className={`w-40 p-3 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#181618] relative ${
+                    className={`w-40 p-3 border rounded-lg text-left cursor-pointer transition-all duration-300 bg-white dark:bg-[#1C130E] relative ${
                       isNodeActive(currentPreset.falseNode.id)
-                        ? "border-sunset-orange shadow-[0_0_15px_rgba(234,97,19,0.25)] ring-2 ring-sunset-orange"
-                        : "border-[#E2E8F0] dark:border-[#453027]/40 hover:border-sunset-orange/40"
+                        ? "border-gray-500 shadow-[0_0_15px_rgba(107,114,128,0.25)] ring-2 ring-gray-500"
+                        : "border-[#E2E8F0] dark:border-slate-800 hover:border-gray-500/40"
                     }`}
                   >
-                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-neutral-400 bg-white dark:bg-[#121012] z-20" />
+                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-neutral-400 bg-white dark:bg-[#100C08] z-20" />
                     <div className="absolute -right-1 top-4 w-2 h-2 rounded-full bg-neutral-400 shadow" />
                     
                     <div className="flex items-center justify-between mb-1.5">
@@ -913,24 +980,24 @@ export default function InteractiveWorkflow() {
                     <div className="text-[10px] font-bold text-[#14161D] dark:text-white truncate">{currentPreset.falseNode.name}</div>
                   </motion.div>
                 </div>
-
+ 
               </div>
-
+ 
             </div>
-
+ 
             {/* LIVE CONSOLE LOGS AT BOTTOM */}
-            <div className="mt-8 border-t border-[#E2E8F0] dark:border-[#453027]/40 pt-4 z-10">
+            <div className="mt-8 border-t border-[#E2E8F0] dark:border-slate-800/40 pt-4 z-10">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-wider text-black/50 dark:text-[#BABABA]/50">
                   <Terminal className="w-3.5 h-3.5" />
                   <span>Execution Audit Console Logs</span>
                 </div>
                 {isPlaying && (
-                  <span className="text-[8px] text-sunset-orange font-mono animate-pulse uppercase font-bold">Streaming real-time execution...</span>
+                  <span className="text-[8px] text-[#CA3F16] font-mono animate-pulse uppercase font-bold">Streaming real-time execution...</span>
                 )}
               </div>
               
-              <div className="bg-[#1C181C] dark:bg-[#141214] p-3 rounded-lg border border-black/10 dark:border-[#453027]/40 text-[10px] text-white/80 font-mono text-left space-y-1 h-28 overflow-y-auto shadow-inner">
+              <div className="bg-[#070A0F] p-3 rounded-lg border border-black/10 dark:border-slate-800/40 text-[10px] text-emerald-400 font-mono text-left space-y-1 h-28 overflow-y-auto shadow-inner">
                 {simLog.length === 0 ? (
                   <div className="text-white/30 flex items-center gap-1.5 h-full justify-center">
                     <span>Press 'Run Test Pipeline' to execute a dry-run log trace.</span>
@@ -943,14 +1010,14 @@ export default function InteractiveWorkflow() {
                       animate={{ opacity: 1, x: 0 }}
                       className="flex items-start gap-1.5 border-b border-white/5 pb-1 last:border-0"
                     >
-                      <span className="text-sunset-orange select-none">&raquo;</span>
+                      <span className="text-[#1E6091] select-none">&raquo;</span>
                       <span className="flex-1 leading-relaxed">{log}</span>
                     </motion.div>
                   ))
                 )}
               </div>
             </div>
-
+ 
             {/* INTERACTIVE CUSTOMIZER PANEL DRAWER overlay */}
             <AnimatePresence>
               {selectedNode && (
@@ -958,16 +1025,16 @@ export default function InteractiveWorkflow() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  className="absolute inset-x-0 bottom-0 bg-white dark:bg-[#161316] border-t-2 border-sunset-orange p-6 z-30 shadow-2xl rounded-t-xl text-left"
+                  className="absolute inset-x-0 bottom-0 bg-white dark:bg-[#161316] border-t-2 border-[#1E6091] p-6 z-30 shadow-2xl rounded-t-xl text-left"
                 >
-                  <div className="flex justify-between items-start border-b border-[#E2E8F0] dark:border-[#453027]/30 pb-3 mb-4">
+                  <div className="flex justify-between items-start border-b border-[#E2E8F0] dark:border-slate-800/30 pb-3 mb-4">
                     <div>
-                      <div className="text-[10px] uppercase font-mono font-bold tracking-widest text-sunset-orange">Atelier Node Configurer</div>
+                      <div className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#1E6091]">Atelier Node Configurer</div>
                       <h3 className="text-sm font-bold text-[#14161D] dark:text-white mt-1">Configure parameters for node: <span className="font-mono">{selectedNode.name}</span></h3>
                     </div>
                     <button
                       onClick={() => setSelectedNode(null)}
-                      className="text-xs px-2 py-1 rounded bg-black/5 hover:bg-sunset-orange hover:text-white dark:bg-white/5 transition-colors cursor-pointer"
+                      className="text-xs px-2 py-1 rounded bg-black/5 hover:bg-[#1E6091] hover:text-white dark:bg-white/5 transition-colors cursor-pointer"
                     >
                       &times; Close Settings
                     </button>
