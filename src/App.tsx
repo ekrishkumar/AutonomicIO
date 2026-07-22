@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import OverviewSection from "./components/OverviewSection";
@@ -8,11 +9,14 @@ import Footer from "./components/Footer";
 import WorkableModal from "./components/WorkableModal";
 import UserDashboard from "./components/UserDashboard";
 import CustomCursor from "./components/CustomCursor";
+import CommandPalette from "./components/CommandPalette";
+import ScrollProgress from "./components/ScrollProgress";
 import { initAuth, logout as firebaseLogout } from "./lib/firebase";
 
 export default function App() {
   const [userSession, setUserSession] = useState<{ email: string; name: string } | null>(null);
   const [activeModal, setActiveModal] = useState<"login" | "register" | "case-study" | "attach" | "verify" | "enquiry" | null>(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [theme, setTheme] = useState<"light" | "midnight">(() => {
     if (typeof window !== "undefined") {
@@ -52,6 +56,14 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleToggleCommandPalette = () => {
+      setIsCommandPaletteOpen((prev) => !prev);
+    };
+    window.addEventListener("toggle-command-palette", handleToggleCommandPalette);
+    return () => window.removeEventListener("toggle-command-palette", handleToggleCommandPalette);
+  }, []);
+
   const handleLoginSuccess = (email: string, name: string) => {
     setUserSession({ email, name });
   };
@@ -68,25 +80,50 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F3F4F5] dark:bg-[#100C08] text-[#100C08] dark:text-[#DBE0E1] selection:bg-[#FF9408]/20 selection:text-neutral-900 transition-colors duration-300">
 
+      {/* Top Scroll Reading Progress & Back-to-Top Button */}
+      <ScrollProgress />
+
+      {/* Command Palette (⌘K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        openEnquiryModal={() => setActiveModal("enquiry")}
+        openLoginModal={() => setActiveModal("login")}
+        openVerifyModal={() => setActiveModal("verify")}
+        setTheme={setTheme}
+        theme={theme}
+      />
+
       {/* Floating Theme Toggle Pill */}
       <div className="fixed top-24 right-6 md:right-8 z-[150]">
         <button
           id="theme-toggle-btn"
           onClick={() => setTheme((prev) => (prev === "light" ? "midnight" : "light"))}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#1E293B]/30 hover:bg-neutral-50 dark:hover:bg-[#1E293B]/50 text-[#0B0F19] dark:text-[#BABABA] border border-black/10 dark:border-[#1E293B]/50 shadow-lg backdrop-blur-md transition-all duration-300 rounded-full cursor-pointer group active:scale-95"
+          className="flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#1E293B]/30 hover:bg-neutral-50 dark:hover:bg-[#1E293B]/50 text-[#0B0F19] dark:text-[#BABABA] border border-black/10 dark:border-[#1E293B]/50 shadow-lg backdrop-blur-md transition-all duration-300 rounded-full cursor-pointer group active:scale-95 overflow-hidden"
           title={`Switch to ${theme === "light" ? "Midnight Dark" : "Light"} Mode`}
         >
-          {theme === "light" ? (
-            <>
-              <Moon className="w-3.5 h-3.5 text-indigo-500 transition-transform group-hover:rotate-12 duration-300" />
-              <span className="text-[10px] uppercase tracking-wider font-bold pr-1 font-mono">Midnight</span>
-            </>
-          ) : (
-            <>
-              <Sun className="w-3.5 h-3.5 text-[#FF6D29] transition-transform group-hover:rotate-45 duration-300" />
-              <span className="text-[10px] uppercase tracking-wider font-bold pr-1 font-mono text-white/90">Light</span>
-            </>
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={theme}
+              initial={{ opacity: 0, y: -6, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.92 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="flex items-center gap-2"
+            >
+              {theme === "light" ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-indigo-500 transition-transform group-hover:rotate-12 duration-300" />
+                  <span className="text-[10px] uppercase tracking-wider font-bold pr-1 font-mono">Midnight</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-[#FF6D29] transition-transform group-hover:rotate-45 duration-300" />
+                  <span className="text-[10px] uppercase tracking-wider font-bold pr-1 font-mono text-white/90">Light</span>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </button>
       </div>
 
@@ -96,6 +133,7 @@ export default function App() {
         onLogout={handleLogout}
         openLoginModal={() => setActiveModal("login")}
         openRegisterModal={() => setActiveModal("register")}
+        openCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       <main>

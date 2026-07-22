@@ -235,6 +235,92 @@ Here are key details about Autonomic I/O to use when answering:
     }
   });
 
+  // POST endpoint to run dynamic AI Agent simulation via Gemini
+  app.post("/api/agents/run", async (req, res) => {
+    try {
+      const { presetName, triggerNode, agentNode, routerNode, trueNode, falseNode } = req.body;
+
+      if (!presetName) {
+        return res.status(400).json({ error: "Preset name is required" });
+      }
+
+      let result;
+      let isFallback = !ai;
+
+      if (ai) {
+        const systemInstruction = `You are the Autonomic I/O Pipeline Orchestration Engine.
+The user is testing an active agent pipeline node workflow in our workspace.
+Your task is to simulate a highly realistic, live execution log trace for the following pipeline configuration:
+
+- Pipeline Preset/Context: "${presetName}"
+- Trigger Node Name: "${triggerNode?.name}" of Type: "${triggerNode?.type}" with fields: ${JSON.stringify(triggerNode?.fields || {})}
+- Agent Node Name: "${agentNode?.name}" running Model: "${agentNode?.model}" with Memory: "${agentNode?.memory}" and Instructions: "${agentNode?.fields?.[0]?.value || agentNode?.desc}" with connected tools: ${JSON.stringify(agentNode?.tools || [])}
+- Router Node Name: "${routerNode?.name}" checking Condition: "${routerNode?.condition}"
+- True Branch Action: "${trueNode?.name}" (${trueNode?.type})
+- False Branch Action: "${falseNode?.name}" (${falseNode?.type})
+
+Generate an execution trace with exactly 5 to 6 sequential step logs and a decision.
+The log output MUST be valid JSON matching the following structure:
+{
+  "logs": [
+    { "nodeId": "${triggerNode?.id}", "log": "Status update for trigger (e.g., custom trigger fired with simulated mock payload)", "duration": 1200 },
+    { "nodeId": "${agentNode?.id}", "log": "Agent scanning active system state and inputs...", "duration": 1500 },
+    { "nodeId": "${agentNode?.id}", "log": "Agent invoking custom tool/instruction, referencing customized instructions or selected core memory...", "duration": 1400 },
+    { "nodeId": "${routerNode?.id}", "log": "Evaluating branch condition statement. State whether it matches and why.", "duration": 1100 },
+    { "nodeId": "${trueNode?.id || 'true-node'}", "log": "Executing final output action based on the branch evaluation.", "duration": 1500 }
+  ],
+  "decision": true,
+  "summary": "Short 1-sentence elegant executive summary of the autonomic agent's result."
+}
+
+Where the last log item's nodeId MUST match either "${trueNode?.id}" (if decision is true) or "${falseNode?.id}" (if decision is false).
+Each log MUST be extremely specific to the customized instruction prompts, trigger URLs, or tools provided in the parameters. Avoid generic descriptions. Make the logs look like a real production enterprise system execution print!`;
+
+        try {
+          const response = await ai.models.generateContent({
+            model: "gemini-3.5-flash",
+            contents: `Execute pipeline simulation run for preset: "${presetName}".`,
+            config: {
+              systemInstruction: systemInstruction,
+              responseMimeType: "application/json",
+            }
+          });
+
+          const text = response.text || "";
+          result = JSON.parse(text.trim());
+          console.log("Successfully ran backend agent simulation with Gemini:", result);
+        } catch (genError) {
+          console.warn("⚠️ Gemini content generation failed for agent pipeline, falling back to local simulation:", genError);
+          isFallback = true;
+        }
+      }
+
+      if (isFallback || !result) {
+        // Generate highly realistic tailored log steps locally based on parameters
+        const isTrue = Math.random() > 0.4;
+        const decisionNodeId = isTrue ? (trueNode?.id || "true-it") : (falseNode?.id || "false-it");
+        const decisionNodeName = isTrue ? (trueNode?.name || "Slack Welcome") : (falseNode?.name || "Slack General");
+
+        result = {
+          logs: [
+            { nodeId: triggerNode?.id || "trig-it", log: `📥 [Local Sandbox Mode] Custom trigger '${triggerNode?.name || "Intake"}' activated successfully`, duration: 1100 },
+            { nodeId: agentNode?.id || "agent-it", log: `🧠 [Local Sandbox Mode] Agent '${agentNode?.name || "AI Agent"}' running with core model ${agentNode?.model || "Claude"}. Reading instructions: "${agentNode?.fields?.[0]?.value || "Default processing"}"`, duration: 1400 },
+            { nodeId: agentNode?.id || "agent-it", log: `🔧 [Local Sandbox Mode] Querying memory database '${agentNode?.memory || "Vector Ledger"}' with ${agentNode?.tools?.length || 0} active integrations`, duration: 1300 },
+            { nodeId: routerNode?.id || "router-it", log: `🔄 [Local Sandbox Mode] Branch Evaluation: Checking rule '${routerNode?.name || "Is Manager"}' with condition: "${routerNode?.condition || "Default"}" -> evaluated to [${isTrue ? "TRUE" : "FALSE"}]`, duration: 1100 },
+            { nodeId: decisionNodeId, log: `🚀 [Local Sandbox Mode] Dispatched final action successfully to '${decisionNodeName}'. Status: 200 OK`, duration: 1500 }
+          ],
+          decision: isTrue,
+          summary: `Atelier Sandbox successfully dry-ran the agent pipeline using local state emulation.`
+        };
+      }
+
+      return res.status(200).json({ success: true, ...result, isFallback });
+    } catch (error: any) {
+      console.error("Agent simulation endpoint error:", error);
+      return res.status(500).json({ error: error?.message || "Internal server error." });
+    }
+  });
+
   // POST endpoint to record client enquiry
   app.post("/api/enquiry", async (req, res) => {
     try {

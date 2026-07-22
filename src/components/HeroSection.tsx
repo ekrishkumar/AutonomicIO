@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Star, BarChart3, Dumbbell, ShieldAlert, Rocket, Plus, Send, RefreshCw, Sparkles, CheckCircle2, Play, Sliders } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import ThreeDTiltCard from "./ThreeDTiltCard";
+import ThreeDGridBackground from "./ThreeDGridBackground";
+import ThreeDParticleCanvas from "./ThreeDParticleCanvas";
 
 interface HeroSectionProps {
   attachedFiles: string[];
@@ -209,6 +212,12 @@ export default function HeroSection({
 
   return (
     <section id="hero-section" className="relative pt-16 pb-24 bg-[#F3F4F5] dark:bg-[#100C08] px-6 sm:px-10 lg:px-12 border-b border-[#E2E8F0] dark:border-[#1C130E]/40 transition-colors duration-300 overflow-hidden">
+      {/* 3D Neural Constellation Particle Canvas */}
+      <ThreeDParticleCanvas />
+
+      {/* 3D Grid Backdrop & floating glowing elements */}
+      <ThreeDGridBackground />
+      
       {/* Subtle Dotted Canvas Background overlay */}
       <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
       
@@ -329,87 +338,93 @@ export default function HeroSection({
           </div>
 
           {/* Interactive Workflow Canvas Nodes Representation */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8 items-center z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8 items-stretch z-10">
             
             {/* NODE 1: Trigger (Webhook) */}
-            <button
-              type="button"
-              onClick={() => setSelectedNodeId("trigger")}
-              className={`p-4 rounded-lg text-left relative transition-all duration-300 cursor-pointer text-inherit ${
-                selectedNodeId === "trigger"
-                  ? "bg-white dark:bg-[#1a171d] border-2 border-sunset-orange shadow-[0_4px_16px_rgba(234,97,19,0.15)] scale-[1.02]"
-                  : "bg-neutral-50 dark:bg-[#181B22] border border-[#E2E8F0] dark:border-[#453027]/40 opacity-75 hover:opacity-100"
-              }`}
-            >
-              {/* Connector ports */}
-              <div className="hidden md:block absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="w-8 h-8 rounded bg-sunset-orange/10 flex items-center justify-center text-sunset-orange">
-                  <Rocket className="w-4 h-4" />
+            <ThreeDTiltCard className="flex">
+              <button
+                type="button"
+                onClick={() => setSelectedNodeId("trigger")}
+                className={`p-5 rounded-xl text-left relative transition-all duration-300 cursor-pointer text-inherit w-full h-full ${
+                  selectedNodeId === "trigger"
+                    ? "bg-white dark:bg-[#1a171d] border-2 border-sunset-orange shadow-[0_4px_20px_rgba(234,97,19,0.2)] scale-[1.01]"
+                    : "bg-neutral-50/90 dark:bg-[#181B22]/90 border border-[#E2E8F0] dark:border-[#453027]/40 opacity-85 hover:opacity-100"
+                }`}
+              >
+                {/* Connector ports */}
+                <div className="hidden md:block absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="w-8 h-8 rounded bg-sunset-orange/10 flex items-center justify-center text-sunset-orange">
+                    <Rocket className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#14161D] dark:text-white font-mono">Webhook Trigger</h4>
+                    <p className="text-[9px] text-[#14161D]/50 dark:text-[#E2E8F0]/40 font-mono">On Prompt Ingest</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#14161D] dark:text-white">Webhook Trigger</h4>
-                  <p className="text-[9px] text-[#14161D]/50 dark:text-[#E2E8F0]/40 font-mono">On Prompt Ingest</p>
-                </div>
-              </div>
-              <p className="text-[10px] text-[#14161D]/70 dark:text-[#E2E8F0]/70 leading-normal font-sans">
-                Listens to inbound customer intent, system logs, or customized actions.
-              </p>
-            </button>
+                <p className="text-[10px] text-[#14161D]/70 dark:text-[#E2E8F0]/70 leading-normal font-sans">
+                  Listens to inbound customer intent, system logs, or customized actions.
+                </p>
+              </button>
+            </ThreeDTiltCard>
 
             {/* NODE 2: Active AI Agent Parser */}
-            <button
-              type="button"
-              onClick={() => setSelectedNodeId("agent")}
-              className={`p-4 rounded-lg text-left relative transition-all duration-300 cursor-pointer text-inherit ${
-                selectedNodeId === "agent"
-                  ? "bg-white dark:bg-[#1a171d] border-2 border-sunset-orange shadow-[0_4px_16px_rgba(234,97,19,0.15)] scale-[1.02]"
-                  : "bg-neutral-50 dark:bg-[#181B22] border border-[#E2E8F0] dark:border-[#453027]/40 opacity-75 hover:opacity-100"
-              }`}
-            >
-              {/* Connector ports */}
-              <div className="hidden md:block absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
-              <div className="hidden md:block absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
-              
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="w-8 h-8 rounded bg-sunset-orange/10 text-sunset-orange flex items-center justify-center">
-                  <BarChart3 className="w-4 h-4" />
+            <ThreeDTiltCard className="flex">
+              <button
+                type="button"
+                onClick={() => setSelectedNodeId("agent")}
+                className={`p-5 rounded-xl text-left relative transition-all duration-300 cursor-pointer text-inherit w-full h-full ${
+                  selectedNodeId === "agent"
+                    ? "bg-white dark:bg-[#1a171d] border-2 border-sunset-orange shadow-[0_4px_20px_rgba(234,97,19,0.2)] scale-[1.01]"
+                    : "bg-neutral-50/90 dark:bg-[#181B22]/90 border border-[#E2E8F0] dark:border-[#453027]/40 opacity-85 hover:opacity-100"
+                }`}
+              >
+                {/* Connector ports */}
+                <div className="hidden md:block absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
+                <div className="hidden md:block absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
+                
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="w-8 h-8 rounded bg-sunset-orange/10 text-sunset-orange flex items-center justify-center">
+                    <BarChart3 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#14161D] dark:text-white font-mono">AI Agent Parser</h4>
+                    <p className="text-[9px] text-[#14161D]/50 dark:text-[#E2E8F0]/40 font-mono">{selectedModel}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#14161D] dark:text-white">AI Agent Parser</h4>
-                  <p className="text-[9px] text-[#14161D]/50 dark:text-[#E2E8F0]/40 font-mono">{selectedModel}</p>
-                </div>
-              </div>
-              <p className="text-[10px] text-[#14161D]/70 dark:text-[#E2E8F0]/70 leading-normal font-sans">
-                Processes guidelines, maps assets, and generates contextual outputs instantly.
-              </p>
-            </button>
+                <p className="text-[10px] text-[#14161D]/70 dark:text-[#E2E8F0]/70 leading-normal font-sans">
+                  Processes guidelines, maps assets, and generates contextual outputs instantly.
+                </p>
+              </button>
+            </ThreeDTiltCard>
 
             {/* NODE 3: Action Delivery */}
-            <button
-              type="button"
-              onClick={() => setSelectedNodeId("delivery")}
-              className={`p-4 rounded-lg text-left relative transition-all duration-300 cursor-pointer text-inherit ${
-                selectedNodeId === "delivery"
-                  ? "bg-white dark:bg-[#1a171d] border-2 border-sunset-orange shadow-[0_4px_16px_rgba(234,97,19,0.15)] scale-[1.02]"
-                  : "bg-neutral-50 dark:bg-[#181B22] border border-[#E2E8F0] dark:border-[#453027]/40 opacity-75 hover:opacity-100"
-              }`}
-            >
-              {/* Connector ports */}
-              <div className="hidden md:block absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="w-8 h-8 rounded bg-sunset-orange/10 flex items-center justify-center text-sunset-orange">
-                  <Send className="w-4 h-4" />
+            <ThreeDTiltCard className="flex">
+              <button
+                type="button"
+                onClick={() => setSelectedNodeId("delivery")}
+                className={`p-5 rounded-xl text-left relative transition-all duration-300 cursor-pointer text-inherit w-full h-full ${
+                  selectedNodeId === "delivery"
+                    ? "bg-white dark:bg-[#1a171d] border-2 border-sunset-orange shadow-[0_4px_20px_rgba(234,97,19,0.2)] scale-[1.01]"
+                    : "bg-neutral-50/90 dark:bg-[#181B22]/90 border border-[#E2E8F0] dark:border-[#453027]/40 opacity-85 hover:opacity-100"
+                }`}
+              >
+                {/* Connector ports */}
+                <div className="hidden md:block absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-sunset-orange bg-white dark:bg-[#12151C] z-20" />
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="w-8 h-8 rounded bg-sunset-orange/10 flex items-center justify-center text-sunset-orange">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#14161D] dark:text-white font-mono">Delivery Hub</h4>
+                    <p className="text-[9px] text-[#14161D]/50 dark:text-[#E2E8F0]/40 font-mono">{deliveryTarget}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#14161D] dark:text-white">Delivery Hub</h4>
-                  <p className="text-[9px] text-[#14161D]/50 dark:text-[#E2E8F0]/40 font-mono">{deliveryTarget}</p>
-                </div>
-              </div>
-              <p className="text-[10px] text-[#14161D]/70 dark:text-[#E2E8F0]/70 leading-normal font-sans">
-                Sends automated Slack triggers, pushes commits to GitHub, or logs structured metrics.
-              </p>
-            </button>
+                <p className="text-[10px] text-[#14161D]/70 dark:text-[#E2E8F0]/70 leading-normal font-sans">
+                  Sends automated Slack triggers, pushes commits to GitHub, or logs structured metrics.
+                </p>
+              </button>
+            </ThreeDTiltCard>
 
           </div>
 

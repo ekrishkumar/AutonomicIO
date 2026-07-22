@@ -72,6 +72,8 @@ export default function InteractiveWorkflow() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(-1);
   const [simLog, setSimLog] = useState<string[]>([]);
+  const [currentRunSteps, setCurrentRunSteps] = useState<{ nodeId: string; log: string; duration: number }[]>([]);
+  const [runDatabaseType, setRunDatabaseType] = useState<string>("");
   
   // Customization parameters & editor modal drawer state
   const [selectedNode, setSelectedNode] = useState<{
@@ -472,34 +474,104 @@ export default function InteractiveWorkflow() {
     }
   ]);
 
-  // Handle playing simulation
-  const handlePlaySimulation = () => {
+  // Handle playing simulation with dynamic backend agent integration
+  const handlePlaySimulation = async () => {
     if (isPlaying) return;
     setIsPlaying(true);
     setCurrentStep(0);
-    setSimLog([]);
+    setSimLog(["📡 Initiating backend handshakes & compiling autonomic nodes..."]);
+    setRunDatabaseType("Connecting...");
 
-    const steps = presets[activeTab].simulationSteps;
-    let stepIndex = 0;
+    try {
+      const payload = {
+        presetName: currentPreset.tabTitle,
+        triggerNode: currentPreset.triggerNode,
+        agentNode: currentPreset.agentNode,
+        routerNode: currentPreset.routerNode,
+        trueNode: currentPreset.trueNode,
+        falseNode: currentPreset.falseNode
+      };
 
-    const executeNextStep = () => {
-      if (stepIndex < steps.length) {
-        setCurrentStep(stepIndex);
-        setSimLog((prev) => [...prev, steps[stepIndex].log]);
-        
-        setTimeout(() => {
-          stepIndex++;
-          executeNextStep();
-        }, steps[stepIndex].duration);
-      } else {
-        setTimeout(() => {
-          setIsPlaying(false);
-          setCurrentStep(-1);
-        }, 1200);
+      const res = await fetch("/api/agents/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to execute agent run on backend");
       }
-    };
 
-    executeNextStep();
+      const data = await res.json();
+      setRunDatabaseType(data.isFallback ? "Sandbox Fallback" : "Gemini Active");
+
+      // Clear the loading message and load the returned logs
+      setSimLog([]);
+      const steps = data.logs || [];
+      setCurrentRunSteps(steps);
+
+      if (steps.length === 0) {
+        setSimLog(["⚠️ Error: Received empty trace from server."]);
+        setIsPlaying(false);
+        return;
+      }
+
+      let stepIndex = 0;
+
+      const executeNextStep = () => {
+        if (stepIndex < steps.length) {
+          setCurrentStep(stepIndex);
+          setSimLog((prev) => [...prev, steps[stepIndex].log]);
+          
+          setTimeout(() => {
+            stepIndex++;
+            executeNextStep();
+          }, steps[stepIndex].duration || 1200);
+        } else {
+          // Add the final elegant summary from backend!
+          if (data.summary) {
+            setSimLog((prev) => [...prev, `📋 Summary: ${data.summary}`]);
+          }
+          setTimeout(() => {
+            setIsPlaying(false);
+            setCurrentStep(-1);
+          }, 1500);
+        }
+      };
+
+      executeNextStep();
+
+    } catch (err) {
+      console.error("Backend agent run error, playing default simulation:", err);
+      setRunDatabaseType("Sandbox Fallback");
+      setSimLog(["⚠️ Remote connection failed. Playing offline simulation..."]);
+      
+      setTimeout(() => {
+        setSimLog([]);
+        setCurrentRunSteps([]);
+        const steps = currentPreset.simulationSteps;
+        let stepIndex = 0;
+
+        const executeNextStep = () => {
+          if (stepIndex < steps.length) {
+            setCurrentStep(stepIndex);
+            setSimLog((prev) => [...prev, steps[stepIndex].log]);
+            
+            setTimeout(() => {
+              stepIndex++;
+              executeNextStep();
+            }, steps[stepIndex].duration);
+          } else {
+            setTimeout(() => {
+              setIsPlaying(false);
+              setCurrentStep(-1);
+            }, 1200);
+          }
+        };
+
+        executeNextStep();
+      }, 1500);
+    }
   };
 
   // Node customization updates
@@ -646,7 +718,8 @@ export default function InteractiveWorkflow() {
   // Helper check for active state in animation loop
   const isNodeActive = (nodeId: string) => {
     if (!isPlaying || currentStep === -1) return false;
-    return currentPreset.simulationSteps[currentStep].nodeId === nodeId;
+    const steps = currentRunSteps.length > 0 ? currentRunSteps : currentPreset.simulationSteps;
+    return steps[currentStep]?.nodeId === nodeId;
   };
 
   return (
@@ -988,9 +1061,20 @@ export default function InteractiveWorkflow() {
             {/* LIVE CONSOLE LOGS AT BOTTOM */}
             <div className="mt-8 border-t border-[#E2E8F0] dark:border-slate-800/40 pt-4 z-10">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-wider text-black/50 dark:text-[#BABABA]/50">
+                <div className="flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-wider text-black/50 dark:text-[#BABABA]/50 flex-wrap">
                   <Terminal className="w-3.5 h-3.5" />
                   <span>Execution Audit Console Logs</span>
+                  {runDatabaseType && (
+                    <span className={`px-2 py-0.5 rounded text-[8px] font-mono border font-bold ${
+                      runDatabaseType === "Gemini Active" 
+                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                        : runDatabaseType === "Connecting..."
+                        ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                        : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                    }`}>
+                      {runDatabaseType}
+                    </span>
+                  )}
                 </div>
                 {isPlaying && (
                   <span className="text-[8px] text-[#CA3F16] font-mono animate-pulse uppercase font-bold">Streaming real-time execution...</span>

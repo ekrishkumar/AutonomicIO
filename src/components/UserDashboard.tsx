@@ -318,7 +318,9 @@ export default function UserDashboard({ userSession, onLogout }: UserDashboardPr
                       Google credentials status
                     </h3>
                   </div>
-                  <HelpCircle className="w-4 h-4 text-neutral-400 cursor-pointer" title="Workspace verification credentials status" />
+                  <span title="Workspace verification credentials status">
+                    <HelpCircle className="w-4 h-4 text-neutral-400 cursor-pointer" />
+                  </span>
                 </div>
 
                 <div className="space-y-3 pt-2">

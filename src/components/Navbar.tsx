@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Menu, X, Sparkles, GitMerge } from "lucide-react";
+import { ChevronDown, Menu, X, Sparkles, GitMerge, Search, Command } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ServiceMonitor from "./ServiceMonitor";
 import Logo from "./Logo";
@@ -9,6 +9,7 @@ interface NavbarProps {
   onLogout: () => void;
   openLoginModal: () => void;
   openRegisterModal: () => void;
+  openCommandPalette?: () => void;
 }
 
 export default function Navbar({
@@ -16,6 +17,7 @@ export default function Navbar({
   onLogout,
   openLoginModal,
   openRegisterModal,
+  openCommandPalette,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -64,7 +66,18 @@ export default function Navbar({
           </div>
 
           {/* Right Action Buttons */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-5">
+            {/* Command Palette Trigger Button */}
+            <button
+              onClick={() => openCommandPalette ? openCommandPalette() : window.dispatchEvent(new CustomEvent("toggle-command-palette"))}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-300 border border-black/5 dark:border-white/5 transition-all text-xs font-mono cursor-pointer active:scale-95"
+              title="Open Command Palette (Cmd+K)"
+            >
+              <Search className="w-3.5 h-3.5 text-[#CA3F16]" />
+              <span className="hidden lg:inline text-[10px] text-neutral-400 font-sans">Search...</span>
+              <kbd className="px-1.5 py-0.5 text-[9px] bg-black/5 dark:bg-white/10 rounded font-mono text-neutral-500 dark:text-neutral-300">⌘K</kbd>
+            </button>
+
             <ServiceMonitor />
 
             {userSession ? (

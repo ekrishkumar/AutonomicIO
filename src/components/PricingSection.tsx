@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, Sparkles, Zap, Shield, Database, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
+import ThreeDTiltCard from "./ThreeDTiltCard";
 
 interface PricingSectionProps {
   openEnquiryModal: () => void;
@@ -89,75 +90,83 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left items-stretch">
           {tiers.map((tier, idx) => {
             const Icon = tier.icon;
+            // Set customized glow colors for each pricing tier card to emphasize depth
+            const cardGlow = tier.primary 
+              ? "rgba(202, 63, 22, 0.18)" 
+              : idx === 0 
+              ? "rgba(251, 191, 36, 0.12)" 
+              : "rgba(99, 102, 241, 0.12)";
+
             return (
-              <div
-                key={idx}
-                className={`relative flex flex-col justify-between p-8 border rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 ${tier.color} ${
-                  tier.primary ? "ring-2 ring-[#CA3F16]/20 scale-102 z-10 md:-translate-y-2" : ""
-                }`}
-              >
-                {tier.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[8px] uppercase tracking-widest font-extrabold bg-[#CA3F16] text-white rounded-full">
-                    {tier.badge}
-                  </span>
-                )}
-
-                <div className="space-y-6">
-                  {/* Icon & Title */}
-                  <div className="flex items-center justify-between">
-                    <div className={`p-2.5 rounded-lg ${tier.primary ? "bg-[#CA3F16]/10 text-[#CA3F16]" : "bg-neutral-100 dark:bg-white/5 text-[#14161D]/60 dark:text-[#E2E8F0]/60"}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <span className="text-[9px] font-bold tracking-[0.15em] text-neutral-400 dark:text-neutral-500 uppercase font-mono">
-                      Tier 0{idx + 1}
+              <ThreeDTiltCard key={idx} glowColor={cardGlow} className="flex flex-col h-full">
+                <div
+                  className={`relative flex flex-col justify-between p-8 border rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full ${tier.color} ${
+                    tier.primary ? "ring-2 ring-[#CA3F16]/20" : ""
+                  }`}
+                >
+                  {tier.badge && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[8px] uppercase tracking-widest font-extrabold bg-[#CA3F16] text-white rounded-full">
+                      {tier.badge}
                     </span>
-                  </div>
+                  )}
 
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-[#14161D] dark:text-white">{tier.name}</h3>
-                    <p className="text-xs text-[#14161D]/60 dark:text-[#E2E8F0]/60 font-light min-h-[48px] leading-relaxed">
-                      {tier.desc}
-                    </p>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-baseline gap-1 py-2 border-y border-black/5 dark:border-white/5">
-                    <span className="text-3xl md:text-4xl font-serif font-extrabold text-[#14161D] dark:text-white">
-                      {tier.price}
-                    </span>
-                    {tier.price !== "Custom" && (
-                      <span className="text-xs text-[#14161D]/55 dark:text-[#E2E8F0]/55 font-mono">
-                        / {tier.period}
+                  <div className="space-y-6">
+                    {/* Icon & Title */}
+                    <div className="flex items-center justify-between">
+                      <div className={`p-2.5 rounded-lg ${tier.primary ? "bg-[#CA3F16]/10 text-[#CA3F16]" : "bg-neutral-100 dark:bg-white/5 text-[#14161D]/60 dark:text-[#E2E8F0]/60"}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-[9px] font-bold tracking-[0.15em] text-neutral-400 dark:text-neutral-500 uppercase font-mono">
+                        Tier 0{idx + 1}
                       </span>
-                    )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold text-[#14161D] dark:text-white">{tier.name}</h3>
+                      <p className="text-xs text-[#14161D]/60 dark:text-[#E2E8F0]/60 font-light min-h-[48px] leading-relaxed">
+                        {tier.desc}
+                      </p>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-baseline gap-1 py-2 border-y border-black/5 dark:border-white/5">
+                      <span className="text-3xl md:text-4xl font-serif font-extrabold text-[#14161D] dark:text-white">
+                        {tier.price}
+                      </span>
+                      {tier.price !== "Custom" && (
+                        <span className="text-xs text-[#14161D]/55 dark:text-[#E2E8F0]/55 font-mono">
+                          / {tier.period}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Features */}
+                    <ul className="space-y-3 pt-2 text-xs">
+                      {tier.features.map((feature, fIdx) => (
+                        <li key={fIdx} className="flex items-start gap-2.5 text-[#14161D]/75 dark:text-[#E2E8F0]/75">
+                          <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${tier.primary ? "text-[#CA3F16]" : "text-emerald-500"}`} />
+                          <span className="font-light">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  {/* Features */}
-                  <ul className="space-y-3 pt-2 text-xs">
-                    {tier.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2.5 text-[#14161D]/75 dark:text-[#E2E8F0]/75">
-                        <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${tier.primary ? "text-[#CA3F16]" : "text-emerald-500"}`} />
-                        <span className="font-light">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Button */}
+                  <div className="pt-8 mt-auto">
+                    <button
+                      onClick={tier.onClick}
+                      className={`w-full py-3 px-4 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
+                        tier.primary
+                          ? "bg-[#CA3F16] hover:bg-[#95122C] text-white shadow-md hover:shadow-lg hover:translate-y-[-1px]"
+                          : "bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 text-[#14161D] dark:text-white border border-transparent dark:border-white/5"
+                      }`}
+                    >
+                      {tier.buttonText}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-
-                {/* Button */}
-                <div className="pt-8 mt-auto">
-                  <button
-                    onClick={tier.onClick}
-                    className={`w-full py-3 px-4 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
-                      tier.primary
-                        ? "bg-[#CA3F16] hover:bg-[#95122C] text-white shadow-md hover:shadow-lg hover:translate-y-[-1px]"
-                        : "bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 text-[#14161D] dark:text-white border border-transparent dark:border-white/5"
-                    }`}
-                  >
-                    {tier.buttonText}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
+              </ThreeDTiltCard>
             );
           })}
         </div>
