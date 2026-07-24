@@ -8,6 +8,7 @@ interface CommandPaletteProps {
   openEnquiryModal?: () => void;
   openLoginModal?: () => void;
   openVerifyModal?: () => void;
+  openAdminModal?: () => void;
   setTheme?: (theme: "light" | "midnight") => void;
   theme?: string;
 }
@@ -18,6 +19,7 @@ export default function CommandPalette({
   openEnquiryModal,
   openLoginModal,
   openVerifyModal,
+  openAdminModal,
   setTheme,
   theme,
 }: CommandPaletteProps) {
@@ -85,6 +87,16 @@ export default function CommandPalette({
       action: () => {
         document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" });
         onClose();
+      },
+    },
+    {
+      id: "admin",
+      title: "Admin Command Center & Telemetry",
+      category: "Restricted",
+      icon: Shield,
+      action: () => {
+        onClose();
+        if (openAdminModal) openAdminModal();
       },
     },
     {

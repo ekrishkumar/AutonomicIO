@@ -1,11 +1,11 @@
 {
-  "projectId": "juicy-climber-st3g1",
-  "appId": "1:482282766144:web:5ce528f677cbee350f04a5",
-  "apiKey": "AIzaSyBPCgDIvu0FQKWHyNpRmGM0be_MvitKGmQ",
-  "authDomain": "juicy-climber-st3g1.firebaseapp.com",
-  "storageBucket": "juicy-climber-st3g1.firebasestorage.app",
-  "messagingSenderId": "482282766144",
-  "measurementId": "",
+  "projectId": "autonomic-io",
+  "appId": "1:912358756552:web:606dd83f04805a4856d5fd",
+  "apiKey": "AIzaSyBXwEmuV8jMrmcx4jMs1yk7pPN7ZAeX990",
+  "authDomain": "autonomic-io.firebaseapp.com",
+  "storageBucket": "autonomic-io.firebasestorage.app",
+  "messagingSenderId": "912358756552",
+  "measurementId": "G-D4WJ50NG8L",
   "oAuthClientId": "482282766144-3btlf2kqnuq7t2hd9544rvrrp65gucbn.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }

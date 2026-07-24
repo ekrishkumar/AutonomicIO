@@ -1,40 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Fira+Code:wght@300..700&family=Instrument+Serif:ital,wght@0,400;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300..700;1,300..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque", sans-serif;
-  --font-mono: "Fira Code", monospace;
-  --font-serif: "Instrument Serif", serif;
-  --color-brand-bg: #F3F4F5;
-  --color-brand-dark: #100C08;
-  --color-brand-earthy: #1C130E;
-  --color-brand-coral: #CA3F16;
-  --color-brand-coral-hover: #95122C;
-  --color-brand-coral-glow: rgba(202, 63, 22, 0.15);
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, monospace;
+  --color-brand-bg: #FFFEFB;
+  --color-brand-dark: #0A0D12;
+  --color-brand-earthy: #121620;
+  --color-brand-coral: #FF4F00;
+  --color-brand-coral-hover: #E04400;
+  --color-brand-coral-glow: rgba(255, 79, 0, 0.18);
   --color-brand-gray: #7F7368;
-  --color-brand-accent: #DBE0E1;
-  --color-sunset-orange: #FF9408;
-  --color-sunset-mid: #CA3F16;
-  --color-sunset-gold: #95122C;
-  --color-sunset-peach: #DBE0E1;
-  --color-premium-blue: #CA3F16;
-  --color-premium-blue-hover: #95122C;
-  --color-premium-blue-glow: rgba(202, 63, 22, 0.15);
-  --color-electric-blue: #FF9408;
-  --color-ice-cyan: #DBE0E1;
+  --color-brand-accent: #C5C0B1;
+  --color-sunset-orange: #FF4F00;
+  --color-sunset-mid: #FF4F00;
+  --color-sunset-gold: #C5C0B1;
+  --color-sunset-peach: #C5C0B1;
+  --color-premium-blue: #FF4F00;
+  --color-premium-blue-hover: #E04400;
+  --color-premium-blue-glow: rgba(255, 79, 0, 0.18);
+  --color-electric-blue: #FF4F00;
+  --color-ice-cyan: #C5C0B1;
 }
 
 @layer base {
+  html {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-[#F3F4F5] text-[#100C08] dark:bg-[#100C08] dark:text-[#DBE0E1] font-sans antialiased selection:bg-[#FF9408]/20 selection:text-neutral-900 transition-colors duration-300;
+    @apply bg-[#FFFEFB] text-[#100C08] dark:bg-[#0A0D12] dark:text-[#E2E8F0] font-sans antialiased selection:bg-[#FF4F00]/20 selection:text-neutral-900 transition-colors duration-300;
     line-height: 1.6;
+    letter-spacing: -0.011em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
   }
 }
 
-/* n8n brand dotted grid canvas style */
+/* n8n / Zapier brand dotted grid canvas style */
 .n8n-dot-grid {
   background-image: radial-gradient(#100C08 1px, transparent 1px);
   background-size: 20px 20px;
@@ -46,38 +58,38 @@
   opacity: 0.035;
 }
 
-/* n8n glow and border effects */
+/* Glow and border effects */
 .n8n-glow-hover {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .n8n-glow-hover:hover {
-  box-shadow: 0 10px 30px -10px rgba(254, 148, 8, 0.12);
-  border-color: rgba(254, 148, 8, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(255, 79, 0, 0.15);
+  border-color: rgba(255, 79, 0, 0.35);
 }
 
 .dark .n8n-glow-hover:hover {
-  box-shadow: 0 10px 30px -10px rgba(254, 148, 8, 0.2);
-  border-color: rgba(254, 148, 8, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(255, 79, 0, 0.25);
+  border-color: rgba(255, 79, 0, 0.45);
 }
 
 .n8n-gradient-coral {
-  @apply bg-gradient-to-r from-sunset-orange via-sunset-mid to-sunset-gold;
+  @apply bg-gradient-to-r from-[#FF4F00] via-[#E04400] to-[#C5C0B1];
 }
 
 .n8n-node-border {
-  @apply border-[#E2E8F0] dark:border-[#1C130E]/40;
+  @apply border-[#C5C0B1]/40 dark:border-white/10;
 }
 
 /* Custom editorial divider line animations */
 .editorial-border {
-  @apply border-black/5 dark:border-[#1C130E]/40;
+  @apply border-[#C5C0B1]/40 dark:border-white/10;
 }
 
 .editorial-divider {
-  @apply h-[1px] bg-black/5 dark:bg-[#1C130E]/40 w-full;
+  @apply h-[1px] bg-[#C5C0B1]/40 dark:bg-white/10 w-full;
 }
 
 .editorial-badge {
-  @apply text-[9px] uppercase tracking-[0.3em] font-semibold text-sunset-mid dark:text-sunset-orange bg-sunset-mid/5 dark:bg-sunset-orange/10 px-2 py-0.5 rounded-full;
+  @apply text-[9px] uppercase tracking-[0.3em] font-semibold text-[#FF4F00] bg-[#FF4F00]/10 px-2 py-0.5 rounded-full border border-[#FF4F00]/20;
 }
 

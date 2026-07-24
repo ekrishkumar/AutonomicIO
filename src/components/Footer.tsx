@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Mail, ArrowRight, Sparkles, Check, Linkedin, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Logo from "./Logo";
+import RealtimeStatusIndicator from "./RealtimeStatusIndicator";
 
 interface FooterProps {
   openModal?: (type: "login" | "register" | "case-study" | "attach" | "verify" | "enquiry") => void;
@@ -46,7 +47,7 @@ export default function Footer({ openModal }: FooterProps) {
       items: [
         { label: "Home", action: "scroll", target: "optiv-navbar" },
         { label: "About", action: "scroll", target: "overview-section" },
-        { label: "Contact", action: "modal", target: "enquiry" as const }
+        { label: "Contact", action: "scroll", target: "contact-section" }
       ]
     },
     {
@@ -88,8 +89,8 @@ export default function Footer({ openModal }: FooterProps) {
   };
 
   return (
-    <footer id="optiv-footer" className="relative bg-[#F3F4F5] dark:bg-[#100C08] border-t border-[#E2E8F0] dark:border-[#1C130E]/40 pt-24 pb-12 text-left transition-colors duration-300 overflow-hidden">
-      <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
+    <footer id="optiv-footer" className="relative bg-[#FFFEFB] dark:bg-[#0A0D12] border-t border-[#C5C0B1]/40 dark:border-[#1C130E]/40 pt-24 pb-12 text-left transition-colors duration-300 overflow-hidden">
+      <div className="absolute inset-0 n8n-dot-grid pointer-events-none opacity-20" />
       
       {/* Dynamic Toast Popup Container */}
       <AnimatePresence>
@@ -98,12 +99,12 @@ export default function Footer({ openModal }: FooterProps) {
             initial={{ opacity: 0, y: 32, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-[9999] bg-white dark:bg-[#1C130E] text-[#100C08] dark:text-[#DBE0E1] px-4 py-3 border border-[#E2E8F0] dark:border-[#1C130E]/40 rounded-lg shadow-2xl flex items-center gap-3 backdrop-blur-md max-w-sm"
+            className="fixed bottom-6 right-6 z-[9999] bg-white dark:bg-[#1C130E] text-[#100C08] dark:text-[#DBE0E1] px-4 py-3 border border-[#C5C0B1]/40 dark:border-[#1C130E]/40 rounded-lg shadow-2xl flex items-center gap-3 backdrop-blur-md max-w-sm"
           >
-            <div className="w-2 h-2 rounded-full bg-[#CA3F16] animate-ping" />
+            <div className="w-2 h-2 rounded-full bg-[#FF4F00] animate-ping" />
             <div className="space-y-0.5">
-              <div className="text-[9px] uppercase tracking-wider font-bold text-[#CA3F16] font-mono">
-                Atelier System Alert
+              <div className="text-[9px] uppercase tracking-wider font-bold text-[#FF4F00] font-mono">
+                System Alert
               </div>
               <div className="text-[11px] font-light leading-snug font-sans">
                 {toastMessage}
@@ -111,7 +112,7 @@ export default function Footer({ openModal }: FooterProps) {
             </div>
             <button
               onClick={() => setToastMessage(null)}
-              className="text-xs text-[#100C08]/50 hover:text-[#CA3F16] dark:text-[#DBE0E1]/50 dark:hover:text-[#CA3F16] ml-auto pl-2 font-mono cursor-pointer bg-transparent border-none p-0"
+              className="text-xs text-[#100C08]/50 hover:text-[#FF4F00] dark:text-[#DBE0E1]/50 dark:hover:text-[#FF4F00] ml-auto pl-2 font-mono cursor-pointer bg-transparent border-none p-0"
             >
               &times;
             </button>
@@ -119,37 +120,37 @@ export default function Footer({ openModal }: FooterProps) {
         )}
       </AnimatePresence>
 
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 z-10">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 z-10">
         
         {/* Main Footer Layout Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-[#E2E8F0] dark:border-[#1C130E]/40">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-[#C5C0B1]/30 dark:border-[#1C130E]/40">
           
           {/* Brand and Newsletter Block */}
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-2.5">
               <Logo size={28} />
               <span className="font-display font-extrabold text-lg tracking-tighter uppercase text-[#100C08] dark:text-white">
-                AUTONOMIC<span className="text-[#CA3F16] font-mono select-none font-bold">.</span>I/O
+                AUTONOMIC<span className="text-[#FF4F00] font-mono select-none font-bold">.</span>I/O
               </span>
-              <span className="px-1.5 py-0.5 text-[7px] tracking-[0.15em] uppercase font-bold text-[#CA3F16] bg-[#CA3F16]/10 border border-[#CA3F16]/20 rounded font-mono">
+              <span className="px-2 py-0.5 text-[8px] tracking-[0.15em] uppercase font-bold text-[#FF4F00] bg-[#FF4F00]/10 border border-[#FF4F00]/20 rounded font-mono">
                 SYSTEM
               </span>
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-[10px] font-bold text-[#CA3F16] uppercase tracking-[0.25em] font-mono">
+              <h4 className="text-[10px] font-bold text-[#FF4F00] uppercase tracking-[0.25em] font-mono">
                 Subscribe
               </h4>
-              <p className="text-xs text-[#100C08]/65 dark:text-[#DBE0E1]/65 max-w-sm leading-relaxed font-light font-sans">
-                Join our newsletter to stay up to date on features, technical releases, and design case studies.
+              <p className="text-xs text-[#100C08]/80 dark:text-[#DBE0E1]/80 max-w-sm leading-relaxed font-light font-sans">
+                Join our newsletter to stay up to date on features, technical releases, and AI orchestration updates.
               </p>
             </div>
 
             {/* Newsletter Subscription input - Fully Responsive Frame */}
             <form onSubmit={handleSubscribe} className="relative max-w-md w-full">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-[#1C130E] p-1 border border-[#E2E8F0] dark:border-[#1C130E]/40 focus-within:border-[#CA3F16] focus-within:ring-1 focus-within:ring-[#CA3F16]/20 transition-all duration-300 rounded-md gap-2 sm:gap-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-[#121620] p-1 border border-[#C5C0B1]/50 dark:border-neutral-800 focus-within:border-[#FF4F00] focus-within:ring-1 focus-within:ring-[#FF4F00]/20 transition-all duration-300 rounded-lg gap-2 sm:gap-0">
                 <div className="flex items-center flex-1 min-w-0">
-                  <div className="pl-3 text-[#CA3F16]">
+                  <div className="pl-3 text-[#FF4F00]">
                     <Mail className="w-3.5 h-3.5" />
                   </div>
                   <input
@@ -158,12 +159,12 @@ export default function Footer({ openModal }: FooterProps) {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     required
-                    className="w-full bg-transparent border-0 outline-none pl-2.5 pr-2 py-2 text-xs text-[#100C08] dark:text-white placeholder-black/30 dark:placeholder-white/30"
+                    className="w-full bg-transparent border-0 outline-none pl-2.5 pr-2 py-2 text-xs text-[#100C08] dark:text-white placeholder-black/40 dark:placeholder-white/40"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#CA3F16] hover:bg-[#95122C] text-white rounded-md text-[9px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                  className="px-5 py-2.5 bg-[#FF4F00] hover:bg-[#E04400] text-white rounded-md text-[9px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 shadow-sm"
                 >
                   <AnimatePresence mode="wait">
                     {subscribed ? (
@@ -191,9 +192,9 @@ export default function Footer({ openModal }: FooterProps) {
               </div>
             </form>
 
-            <p className="text-[10px] text-[#100C08]/50 dark:text-[#DBE0E1]/50 leading-normal max-w-sm font-light font-sans">
+            <p className="text-[10px] text-[#100C08]/60 dark:text-[#DBE0E1]/60 leading-normal max-w-sm font-light font-sans">
               By subscribing you agree to our{" "}
-              <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="underline hover:text-[#CA3F16]">
+              <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="underline hover:text-[#FF4F00]">
                 Privacy Policy
               </a>
               .
@@ -204,11 +205,11 @@ export default function Footer({ openModal }: FooterProps) {
                 href="https://www.linkedin.com/company/autonomicio/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-neutral-300 dark:border-[#1C130E]/60 bg-white dark:bg-black/20 hover:bg-neutral-50 dark:hover:bg-white/5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#100C08]/85 dark:text-[#DBE0E1]/85 hover:text-[#CA3F16] dark:hover:text-[#CA3F16] hover:border-[#CA3F16]/30 transition-all cursor-pointer active:scale-95 shadow-sm group"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-neutral-300 dark:border-[#1C130E]/60 bg-white dark:bg-black/20 hover:bg-neutral-50 dark:hover:bg-white/5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#100C08]/85 dark:text-[#DBE0E1]/85 hover:text-[#FF4F00] dark:hover:text-[#FF4F00] hover:border-[#FF4F00]/30 transition-all cursor-pointer active:scale-95 shadow-sm group"
               >
-                <Linkedin className="w-3.5 h-3.5 text-[#CA3F16]" />
+                <Linkedin className="w-3.5 h-3.5 text-[#FF4F00]" />
                 <span>Connect on LinkedIn</span>
-                <ArrowRight className="w-3 h-3 text-[#100C08]/40 dark:text-[#DBE0E1]/40 group-hover:translate-x-0.5 group-hover:text-[#CA3F16] transition-transform" />
+                <ArrowRight className="w-3 h-3 text-[#100C08]/40 dark:text-[#DBE0E1]/40 group-hover:translate-x-0.5 group-hover:text-[#FF4F00] transition-transform" />
               </a>
             </div>
           </div>
@@ -217,7 +218,7 @@ export default function Footer({ openModal }: FooterProps) {
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {footerLinks.map((group, idx) => (
               <div key={idx} className="space-y-4">
-                <h5 className="text-[10px] font-bold text-[#100C08]/80 dark:text-white uppercase tracking-[0.2em] font-mono">
+                <h5 className="text-[10px] font-bold text-[#100C08] dark:text-white uppercase tracking-[0.2em] font-mono">
                   {group.title}
                 </h5>
                 <ul className="space-y-2 text-xs">
@@ -226,7 +227,7 @@ export default function Footer({ openModal }: FooterProps) {
                       <a
                         href="#"
                         onClick={(e) => handleLinkClick(e, item)}
-                        className="text-[#100C08]/60 dark:text-white/60 hover:text-[#CA3F16] dark:hover:text-[#CA3F16] transition-colors py-0.5 block font-light font-sans"
+                        className="text-[#100C08]/75 dark:text-white/75 hover:text-[#FF4F00] dark:hover:text-[#FF4F00] transition-colors py-0.5 block font-light font-sans"
                       >
                         {item.label}
                       </a>
@@ -239,17 +240,22 @@ export default function Footer({ openModal }: FooterProps) {
 
         </div>
 
+        {/* Real-time System Status Indicator Section */}
+        <div className="py-10 border-b border-[#C5C0B1]/30 dark:border-[#1C130E]/40">
+          <RealtimeStatusIndicator />
+        </div>
+
         {/* Interactive FAQ Accordion Section */}
-        <div className="py-12 border-b border-[#E2E8F0] dark:border-[#1C130E]/40">
+        <div className="py-12 border-b border-[#C5C0B1]/30 dark:border-[#1C130E]/40">
           <div className="max-w-3xl mx-auto space-y-6">
             <div className="space-y-1.5 text-center sm:text-left">
-              <h4 className="text-[10px] font-bold text-[#CA3F16] uppercase tracking-[0.25em] font-mono">
+              <h4 className="text-[10px] font-bold text-[#FF4F00] uppercase tracking-[0.25em] font-mono">
                 System Documentation
               </h4>
               <h3 className="text-2xl font-serif italic text-[#100C08] dark:text-white tracking-tighter">
                 Frequently Asked Questions
               </h3>
-              <p className="text-xs text-[#100C08]/50 dark:text-[#DBE0E1]/50 font-light font-sans max-w-xl">
+              <p className="text-xs text-[#100C08]/70 dark:text-[#DBE0E1]/70 font-light font-sans max-w-xl">
                 Quick solutions to common queries regarding our automated agent sandbox, secure integrations, and execution protocols.
               </p>
             </div>
@@ -260,7 +266,7 @@ export default function Footer({ openModal }: FooterProps) {
                 return (
                   <div
                     key={fIdx}
-                    className="border border-neutral-200 dark:border-[#1C130E]/60 rounded-lg bg-white/40 dark:bg-black/10 overflow-hidden transition-all duration-200 hover:border-[#CA3F16]/30 dark:hover:border-[#CA3F16]/30"
+                    className="border border-[#C5C0B1]/40 dark:border-[#1C130E]/60 rounded-lg bg-white/60 dark:bg-black/20 overflow-hidden transition-all duration-200 hover:border-[#FF4F00]/40 dark:hover:border-[#FF4F00]/40"
                   >
                     <button
                       onClick={() => setOpenFaq(isOpen ? null : fIdx)}
@@ -272,7 +278,7 @@ export default function Footer({ openModal }: FooterProps) {
                       <motion.div
                         animate={{ rotate: isOpen ? 180 : 0 }}
                         transition={{ duration: 0.2 }}
-                        className="text-[#CA3F16]"
+                        className="text-[#FF4F00]"
                       >
                         <ChevronDown className="w-4 h-4" />
                       </motion.div>
@@ -286,7 +292,7 @@ export default function Footer({ openModal }: FooterProps) {
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.25, ease: "easeInOut" }}
                         >
-                          <div className="px-4 pb-4 pt-1 text-xs text-[#100C08]/70 dark:text-[#DBE0E1]/70 font-light font-sans leading-relaxed border-t border-dashed border-neutral-150 dark:border-[#1C130E]/30 mt-1">
+                          <div className="px-4 pb-4 pt-1 text-xs text-[#100C08]/80 dark:text-[#DBE0E1]/80 font-light font-sans leading-relaxed border-t border-dashed border-neutral-200 dark:border-[#1C130E]/30 mt-1">
                             {faq.answer}
                           </div>
                         </motion.div>
@@ -300,25 +306,25 @@ export default function Footer({ openModal }: FooterProps) {
         </div>
 
         {/* Bottom bar copyrights */}
-        <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-wider text-[#100C08]/50 dark:text-[#DBE0E1]/40 font-light font-mono">
+        <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-wider text-[#100C08]/60 dark:text-[#DBE0E1]/50 font-light font-mono">
           <div>© 2026 Autonomic I/O. All rights reserved.</div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center">
-            <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="hover:text-[#CA3F16] dark:hover:text-[#CA3F16] transition-colors">
+            <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="hover:text-[#FF4F00] dark:hover:text-[#FF4F00] transition-colors">
               Terms of Service
             </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="hover:text-[#CA3F16] dark:hover:text-[#CA3F16] transition-colors">
+            <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="hover:text-[#FF4F00] dark:hover:text-[#FF4F00] transition-colors">
               Privacy Policy
             </a>
-             <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="hover:text-[#CA3F16] dark:hover:text-[#CA3F16] transition-colors">
+             <a href="#" onClick={(e) => { e.preventDefault(); if (openModal) openModal("verify"); }} className="hover:text-[#FF4F00] dark:hover:text-[#FF4F00] transition-colors">
               Compliance
             </a>
             <a 
               href="https://www.linkedin.com/company/autonomicio/" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-[#CA3F16] dark:hover:text-[#CA3F16] transition-colors flex items-center gap-1.5 normal-case font-sans font-medium"
+              className="hover:text-[#FF4F00] dark:hover:text-[#FF4F00] transition-colors flex items-center gap-1.5 normal-case font-sans font-medium"
             >
-              <Linkedin className="w-3 h-3 shrink-0 text-[#CA3F16]" />
+              <Linkedin className="w-3 h-3 shrink-0 text-[#FF4F00]" />
               <span>LinkedIn</span>
             </a>
           </div>

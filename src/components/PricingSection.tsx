@@ -71,26 +71,25 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
   ];
 
   return (
-    <section id="pricing-section" className="py-24 bg-[#F3F4F5] dark:bg-[#100C08] px-6 sm:px-10 lg:px-12 border-b border-[#E2E8F0] dark:border-[#1C130E] transition-colors duration-300 relative">
+    <section id="pricing-section" className="py-16 sm:py-24 bg-[#F3F4F5] dark:bg-[#100C08] px-4 sm:px-8 lg:px-12 border-b border-[#E2E8F0] dark:border-[#1C130E] transition-colors duration-300 relative">
       <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
 
-      <div className="relative max-w-6xl mx-auto space-y-16 z-10 text-center">
+      <div className="relative max-w-6xl mx-auto space-y-12 sm:space-y-16 z-10 text-center">
         {/* Section Header */}
         <div className="space-y-4 max-w-2xl mx-auto">
           <span className="editorial-badge">PRICING TIERS</span>
-          <h2 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-[#14161D] dark:text-white leading-tight">
+          <h2 className="text-2xl sm:text-4xl font-display font-extrabold tracking-tight text-[#14161D] dark:text-white leading-tight">
             Transparent pricing for <br className="hidden sm:inline" />limitless automation.
           </h2>
-          <p className="text-xs text-[#14161D]/60 dark:text-[#E2E8F0]/60 leading-relaxed font-light">
+          <p className="text-xs sm:text-sm text-[#14161D]/60 dark:text-[#E2E8F0]/60 leading-relaxed font-light">
             Start free on our Sandbox environment or scale up to our robust PostgreSQL-backed Atelier Pro clusters for deep enterprise Google Workspace synchronization.
           </p>
         </div>
 
         {/* Pricing Matrix Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left items-stretch">
           {tiers.map((tier, idx) => {
             const Icon = tier.icon;
-            // Set customized glow colors for each pricing tier card to emphasize depth
             const cardGlow = tier.primary 
               ? "rgba(202, 63, 22, 0.18)" 
               : idx === 0 
@@ -100,8 +99,8 @@ export default function PricingSection({ openEnquiryModal }: PricingSectionProps
             return (
               <ThreeDTiltCard key={idx} glowColor={cardGlow} className="flex flex-col h-full">
                 <div
-                  className={`relative flex flex-col justify-between p-8 border rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full ${tier.color} ${
-                    tier.primary ? "ring-2 ring-[#CA3F16]/20" : ""
+                  className={`relative flex flex-col justify-between p-6 sm:p-8 border rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full ${tier.color} ${
+                    tier.primary ? "ring-2 ring-[#FF4F00]/20" : ""
                   }`}
                 >
                   {tier.badge && (

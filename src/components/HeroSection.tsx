@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Star, BarChart3, Dumbbell, ShieldAlert, Rocket, Plus, Send, RefreshCw, Sparkles, CheckCircle2, Play, Sliders } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ThreeDTiltCard from "./ThreeDTiltCard";
-import ThreeDGridBackground from "./ThreeDGridBackground";
-import ThreeDParticleCanvas from "./ThreeDParticleCanvas";
 
 interface HeroSectionProps {
   attachedFiles: string[];
@@ -211,61 +209,76 @@ export default function HeroSection({
   ];
 
   return (
-    <section id="hero-section" className="relative pt-16 pb-24 bg-[#F3F4F5] dark:bg-[#100C08] px-6 sm:px-10 lg:px-12 border-b border-[#E2E8F0] dark:border-[#1C130E]/40 transition-colors duration-300 overflow-hidden">
-      {/* 3D Neural Constellation Particle Canvas */}
-      <ThreeDParticleCanvas />
-
-      {/* 3D Grid Backdrop & floating glowing elements */}
-      <ThreeDGridBackground />
-      
-      {/* Subtle Dotted Canvas Background overlay */}
-      <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
+    <section id="hero-section" className="relative pt-12 sm:pt-16 pb-16 sm:pb-24 bg-[#FFFEFB] dark:bg-[#0A0D12] px-4 sm:px-8 lg:px-12 border-b border-[#C5C0B1]/30 dark:border-[#1C130E]/40 transition-colors duration-300 overflow-hidden">
+      {/* Subtle Minimal Background Dot Pattern */}
+      <div className="absolute inset-0 n8n-dot-grid pointer-events-none opacity-20" />
       
       <div className="relative max-w-6xl mx-auto text-center z-10">
         
-        {/* Release Status Badge */}
+        {/* Top Notice Banner */}
         <div className="flex flex-col items-center gap-3 mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#CA3F16]/20 bg-[#CA3F16]/5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#CA3F16]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#CA3F16] animate-pulse" />
-            <span>Autonomic I/O Pipeline Sandbox V2.0</span>
-          </div>
+          <button
+            onClick={() => document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" })}
+            className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#FF4F00]/30 bg-[#FF4F00]/10 hover:bg-[#FF4F00]/20 transition-all text-[11px] sm:text-xs font-mono font-bold text-[#FF4F00] cursor-pointer group max-w-full text-center"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#FF4F00] shrink-0" />
+            <span className="truncate sm:whitespace-normal">Redefine your company for the AI era at AutonomicConnect 2026.</span>
+            <span className="group-hover:translate-x-1 transition-transform font-bold shrink-0">&rarr;</span>
+          </button>
+        </div>
+
+        {/* Sub-eyebrow Header */}
+        <div className="text-[11px] font-mono font-extrabold uppercase tracking-widest text-[#FF4F00] mb-3">
+          YOUR HOME FOR AI ORCHESTRATION
         </div>
  
         {/* Brand Headline */}
         <div className="mb-8 max-w-4xl mx-auto space-y-4">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-display font-extrabold tracking-tight text-[#100C08] dark:text-white leading-[1.12]">
-            Engineering the <br />
-            <span className="bg-gradient-to-r from-[#FF9408] via-[#CA3F16] to-[#95122C] bg-clip-text text-transparent">Autonomous Future.</span>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-display font-extrabold tracking-tight text-[#100C08] dark:text-white leading-[1.08]">
+            Any AI. Every tool. <br />
+            <span className="bg-gradient-to-r from-[#FF4F00] via-[#E04400] to-[#C5C0B1] bg-clip-text text-transparent">
+              One system.
+            </span>
           </h1>
           
-          {/* Elegant tagline matrix carousel strip */}
-          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1.5 text-[9px] sm:text-[10px] font-mono font-semibold tracking-wider uppercase text-[#100C08]/50 dark:text-[#DBE0E1]/40 py-2">
-            <span>Autonomy Through Intelligence</span>
-            <span className="hidden sm:inline text-[#CA3F16] font-bold">&bull;</span>
-            <span>Automate. Optimize. Evolve.</span>
-            <span className="hidden sm:inline text-[#CA3F16] font-bold">&bull;</span>
-            <span>Where Intelligence Becomes Autonomous</span>
-          </div>
-
-          <p className="max-w-2xl mx-auto text-[#100C08]/70 dark:text-[#DBE0E1]/70 text-sm font-light leading-relaxed">
-            Autonomic IO is an AI technology company building intelligent automation systems that help businesses operate faster, smarter, and more efficiently through artificial intelligence, software engineering, and data-driven innovation.
+          <p className="max-w-2xl mx-auto text-[#100C08]/80 dark:text-[#DBE0E1]/80 text-base sm:text-lg font-light leading-relaxed">
+            The problem isn't the AI — it's getting it connected to your real tools, running reliably, and keeping it safe as your team grows.
           </p>
         </div>
  
-        {/* Primary Action Button */}
-        <div className="flex justify-center gap-4 mb-14">
+        {/* Primary Action Button Bar */}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-14">
           <button
             onClick={() => document.getElementById("prompt-form")?.scrollIntoView({ behavior: "smooth" })}
-            className="px-6 py-3 rounded-md bg-[#CA3F16] hover:bg-[#95122C] text-white text-[10px] font-bold uppercase tracking-wider transition-all duration-300 shadow-[0_4px_14px_rgba(202,63,22,0.3)] cursor-pointer active:scale-95"
+            className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#FF4F00] hover:bg-[#E04400] text-white text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 shadow-[0_6px_20px_rgba(255,79,0,0.35)] cursor-pointer active:scale-95 flex items-center justify-center gap-2"
           >
-            Launch Pipeline Sandbox &darr;
+            <span>Sign up free</span>
+            <span className="font-bold">&rarr;</span>
           </button>
           <button
-            onClick={() => document.getElementById("overview-section")?.scrollIntoView({ behavior: "smooth" })}
-            className="px-6 py-3 rounded-md border border-[#E2E8F0] dark:border-[#1C130E]/40 bg-white dark:bg-[#1C130E] hover:bg-neutral-50 dark:hover:bg-[#100C08] text-[#100C08] dark:text-[#DBE0E1] text-[10px] font-bold uppercase tracking-wider transition-all duration-200"
+            onClick={() => document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" })}
+            className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[#C5C0B1]/50 dark:border-neutral-700 bg-[#FFFEFB] dark:bg-[#181E2A] hover:bg-neutral-100 dark:hover:bg-[#121620] text-[#100C08] dark:text-white text-xs font-mono font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer"
           >
-            Learn About Autonomic IO
+            Contact Sales / Team
           </button>
+        </div>
+
+        {/* Trusted Logos Strip */}
+        <div className="mb-14 pt-6 border-t border-neutral-200/60 dark:border-neutral-800/60">
+          <div className="text-[10px] font-mono text-neutral-400 font-bold uppercase tracking-widest mb-6">
+            TRUSTED BY INNOVATIVE TEAMS WORLDWIDE
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-70 grayscale hover:grayscale-0 transition-all font-mono font-bold text-xs text-neutral-600 dark:text-neutral-400">
+            <span>META</span>
+            <span>LOWE'S</span>
+            <span>CURSOR</span>
+            <span>SAMSUNG</span>
+            <span>OKTA</span>
+            <span>MASTERCARD</span>
+            <span>DROPBOX</span>
+            <span>SHOPIFY</span>
+            <span>NVIDIA</span>
+          </div>
         </div>
 
         {/* Workflow Active Tabs */}

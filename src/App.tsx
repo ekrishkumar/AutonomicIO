@@ -3,9 +3,21 @@ import { Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
+import AgentTeamCanvas from "./components/AgentTeamCanvas";
+import EnterpriseRoiSection from "./components/EnterpriseRoiSection";
+import EvaluationBenchmarksSection from "./components/EvaluationBenchmarksSection";
+import AppIntegrationsGrid from "./components/AppIntegrationsGrid";
+import FeatureSplit from "./components/FeatureSplit";
+import ZapierGovernanceGrid from "./components/ZapierGovernanceGrid";
+import ZapierDarkResultsSection from "./components/ZapierDarkResultsSection";
+import ZapierMcpSdkSection from "./components/ZapierMcpSdkSection";
 import OverviewSection from "./components/OverviewSection";
+import GovernanceMatrixSection from "./components/GovernanceMatrixSection";
+import ContactSection from "./components/ContactSection";
+import QuoteSection from "./components/QuoteSection";
 import PricingSection from "./components/PricingSection";
 import Footer from "./components/Footer";
+import SEO from "./components/SEO";
 import WorkableModal from "./components/WorkableModal";
 import UserDashboard from "./components/UserDashboard";
 import CustomCursor from "./components/CustomCursor";
@@ -15,7 +27,7 @@ import { initAuth, logout as firebaseLogout } from "./lib/firebase";
 
 export default function App() {
   const [userSession, setUserSession] = useState<{ email: string; name: string } | null>(null);
-  const [activeModal, setActiveModal] = useState<"login" | "register" | "case-study" | "attach" | "verify" | "enquiry" | null>(null);
+  const [activeModal, setActiveModal] = useState<"login" | "register" | "case-study" | "attach" | "verify" | "enquiry" | "admin" | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [theme, setTheme] = useState<"light" | "midnight">(() => {
@@ -78,7 +90,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F4F5] dark:bg-[#100C08] text-[#100C08] dark:text-[#DBE0E1] selection:bg-[#FF9408]/20 selection:text-neutral-900 transition-colors duration-300">
+    <div className="min-h-screen bg-[#FFFEFB] dark:bg-[#0A0D12] text-[#100C08] dark:text-[#DBE0E1] selection:bg-[#FF4F00]/20 selection:text-neutral-900 transition-colors duration-300">
+      {/* Dynamic SEO Meta Management */}
+      <SEO />
 
       {/* Top Scroll Reading Progress & Back-to-Top Button */}
       <ScrollProgress />
@@ -90,6 +104,7 @@ export default function App() {
         openEnquiryModal={() => setActiveModal("enquiry")}
         openLoginModal={() => setActiveModal("login")}
         openVerifyModal={() => setActiveModal("verify")}
+        openAdminModal={() => setActiveModal("admin")}
         setTheme={setTheme}
         theme={theme}
       />
@@ -99,7 +114,7 @@ export default function App() {
         <button
           id="theme-toggle-btn"
           onClick={() => setTheme((prev) => (prev === "light" ? "midnight" : "light"))}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/90 dark:bg-[#1E293B]/30 hover:bg-neutral-50 dark:hover:bg-[#1E293B]/50 text-[#0B0F19] dark:text-[#BABABA] border border-black/10 dark:border-[#1E293B]/50 shadow-lg backdrop-blur-md transition-all duration-300 rounded-full cursor-pointer group active:scale-95 overflow-hidden"
+          className="flex items-center gap-2 px-3.5 py-1.5 bg-white/90 dark:bg-[#1E293B]/30 hover:bg-neutral-50 dark:hover:bg-[#1E293B]/50 text-[#0B0F19] dark:text-[#BABABA] border border-[#C5C0B1]/40 dark:border-[#1E293B]/50 shadow-lg backdrop-blur-md transition-all duration-300 rounded-full cursor-pointer group active:scale-95 overflow-hidden"
           title={`Switch to ${theme === "light" ? "Midnight Dark" : "Light"} Mode`}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -118,7 +133,7 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <Sun className="w-3.5 h-3.5 text-[#FF6D29] transition-transform group-hover:rotate-45 duration-300" />
+                  <Sun className="w-3.5 h-3.5 text-[#FF4F00] transition-transform group-hover:rotate-45 duration-300" />
                   <span className="text-[10px] uppercase tracking-wider font-bold pr-1 font-mono text-white/90">Light</span>
                 </>
               )}
@@ -134,6 +149,7 @@ export default function App() {
         openLoginModal={() => setActiveModal("login")}
         openRegisterModal={() => setActiveModal("register")}
         openCommandPalette={() => setIsCommandPaletteOpen(true)}
+        openAdminModal={() => setActiveModal("admin")}
       />
 
       <main>
@@ -151,7 +167,7 @@ export default function App() {
             <div className="max-w-7xl mx-auto relative z-10 space-y-6">
               <div className="flex items-center gap-2">
                 <span className="editorial-badge">USER PORTAL</span>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-[#FF6D29] font-mono">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-[#FF4F00] font-mono">
                   AUTHENTICATED AS {userSession.email}
                 </span>
               </div>
@@ -160,11 +176,44 @@ export default function App() {
           </section>
         )}
 
-        {/* 3. Tiered Statement Summary */}
+        {/* 3. Zapier/Enterprise 4-Grid Governance Section */}
+        <ZapierGovernanceGrid />
+
+        {/* 4. Multi-Agent Orchestration Canvas */}
+        <AgentTeamCanvas />
+
+        {/* 5. Zapier/Enterprise Dark Results & Live Telemetry Counter */}
+        <ZapierDarkResultsSection />
+
+        {/* 6. Enterprise ROI & 6-Week Deployment Timeline */}
+        <EnterpriseRoiSection />
+
+        {/* 7. Zapier/Enterprise Autonomic MCP + SDK Section */}
+        <ZapierMcpSdkSection />
+
+        {/* 8. Evaluation Benchmarks & Real-Time Oversight Dashboard */}
+        <EvaluationBenchmarksSection />
+
+        {/* 9. Universal 1,000+ App Integrations Search Grid */}
+        <AppIntegrationsGrid />
+
+        {/* 10. Detailed Feature Split Showcase */}
+        <FeatureSplit />
+
+        {/* 11. Autonomic IO Company & Platform Overview */}
         <OverviewSection />
 
-        {/* 4. Visual Pricing Tier Matrix */}
+        {/* 12. Enterprise Governance Comparison Matrix & FAQ */}
+        <GovernanceMatrixSection />
+
+        {/* 10. Partner Spotlight & Quote */}
+        <QuoteSection openCaseStudyModal={() => setActiveModal("case-study")} />
+
+        {/* 11. Visual Pricing Tier Matrix */}
         <PricingSection openEnquiryModal={() => setActiveModal("enquiry")} />
+
+        {/* 12. Direct Team Contact Page Section */}
+        <ContactSection />
       </main>
 
       {/* 5. Complete Footer */}
@@ -178,6 +227,7 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
         attachedFiles={attachedFiles}
         setAttachedFiles={setAttachedFiles}
+        userSession={userSession}
       />
 
       {/* Dynamic Cursor tracking */}

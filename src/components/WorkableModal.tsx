@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Check, Lock, ArrowRight, ShieldCheck, FileCode, FileSpreadsheet, FileText, FileUp, Sparkles, Terminal, Github, Mail } from "lucide-react";
 import { googleSignIn, githubSignIn, emailSignIn, emailSignUp } from "../lib/firebase";
+import AdminDashboard from "./AdminDashboard";
+import AdminRouteGuard from "./AdminRouteGuard";
 
 interface WorkableModalProps {
   isOpen: boolean;
-  type: "login" | "register" | "case-study" | "attach" | "verify" | "enquiry" | null;
+  type: "login" | "register" | "case-study" | "attach" | "verify" | "enquiry" | "admin" | null;
   onClose: () => void;
   onLoginSuccess: (email: string, name: string) => void;
   attachedFiles: string[];
   setAttachedFiles: React.Dispatch<React.SetStateAction<string[]>>;
+  userSession?: { email: string; name: string } | null;
 }
 
 export default function WorkableModal({
@@ -19,6 +22,7 @@ export default function WorkableModal({
   onLoginSuccess,
   attachedFiles,
   setAttachedFiles,
+  userSession,
 }: WorkableModalProps) {
   // Login form state
   const [email, setEmail] = useState("");
@@ -218,13 +222,24 @@ export default function WorkableModal({
           />
 
           {/* Modal Container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: 10 }}
-            transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#0A0D14] text-[#1A1A1A] dark:text-white border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col justify-between rounded-xl z-10 text-left"
-          >
+          {type === "admin" ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98, y: 10 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-5xl z-10 my-8"
+            >
+              <AdminRouteGuard userSession={userSession || null} onClose={onClose} />
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98, y: 10 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-lg bg-white dark:bg-[#0A0D14] text-[#1A1A1A] dark:text-white border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col justify-between rounded-xl z-10 text-left"
+            >
             {/* Header row */}
             <div className="flex justify-between items-center border-b border-black/5 dark:border-[#1E293B]/20 pb-4 mb-6">
               <div className="flex items-center gap-2">
@@ -824,6 +839,7 @@ export default function WorkableModal({
 
             </div>
           </motion.div>
+          )}
         </div>
       )}
     </AnimatePresence>

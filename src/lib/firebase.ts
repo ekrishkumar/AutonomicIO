@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
 import { 
   getAuth, 
   GoogleAuthProvider, 
@@ -10,9 +11,30 @@ import {
   updateProfile,
   User 
 } from "firebase/auth";
-import firebaseConfig from "../../firebase-applet-config.json";
+
+// Web app's Firebase configuration
+export const firebaseConfig = {
+  apiKey: "AIzaSyBXwEmuV8jMrmcx4jMs1yk7pPN7ZAeX990",
+  authDomain: "autonomic-io.firebaseapp.com",
+  projectId: "autonomic-io",
+  storageBucket: "autonomic-io.firebasestorage.app",
+  messagingSenderId: "912358756552",
+  appId: "1:912358756552:web:606dd83f04805a4856d5fd",
+  measurementId: "G-D4WJ50NG8L"
+};
 
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase Analytics safely for browser client
+export let analytics: ReturnType<typeof getAnalytics> | null = null;
+if (typeof window !== "undefined") {
+  isAnalyticsSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  }).catch((err) => console.warn("Analytics not supported in current environment", err));
+}
+
 export const auth = getAuth(app);
 export const googleAuthProvider = new GoogleAuthProvider();
 export const githubAuthProvider = new GithubAuthProvider();

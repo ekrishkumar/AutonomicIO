@@ -723,7 +723,7 @@ export default function InteractiveWorkflow() {
   };
 
   return (
-    <section id="interactive-workflow-section" className="py-24 px-6 sm:px-10 lg:px-12 bg-[#F3F4F5] dark:bg-[#100C08] border-b border-[#E2E8F0] dark:border-[#1C130E]/40 transition-colors duration-300 relative overflow-hidden">
+    <section id="interactive-workflow-section" className="py-16 sm:py-24 px-4 sm:px-8 lg:px-12 bg-[#F3F4F5] dark:bg-[#100C08] border-b border-[#E2E8F0] dark:border-[#1C130E]/40 transition-colors duration-300 relative overflow-hidden">
       <div className="absolute inset-0 n8n-dot-grid pointer-events-none" />
       
       <div className="max-w-7xl mx-auto">
